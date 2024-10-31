@@ -54,10 +54,12 @@ section
 
 variable (a b c d e f : ℝ)
 
-example (h : a * b = c * d) (h' : e = f) : a * (b * e) = c * (d * f) := by
+lemma lemma1 (h : a * b = c * d) (h' : e = f) : a * (b * e) = c * (d * f) := by
   rw [h', ← mul_assoc, h, mul_assoc]
 
 end
+
+#check lemma1
 
 section
 variable (a b c : ℝ)
@@ -83,8 +85,8 @@ example : (a + b) * (a + b) = a * a + 2 * (a * b) + b * b := by
 
 example : (a + b) * (a + b) = a * a + 2 * (a * b) + b * b :=
   calc
-    (a + b) * (a + b) = a * a + b * a + (a * b + b * b) := by
-      rw [mul_add, add_mul, add_mul]
+    (a + b) * (a + b) = a * a + b * a + (a * b + b * b) := by ring
+--      rw [mul_add, add_mul, add_mul]
     _ = a * a + (b * a + a * b) + b * b := by
       rw [← add_assoc, add_assoc (a * a)]
     _ = a * a + 2 * (a * b) + b * b := by
@@ -92,12 +94,12 @@ example : (a + b) * (a + b) = a * a + 2 * (a * b) + b * b :=
 
 example : (a + b) * (a + b) = a * a + 2 * (a * b) + b * b :=
   calc
-    (a + b) * (a + b) = a * a + b * a + (a * b + b * b) := by
-      sorry
-    _ = a * a + (b * a + a * b) + b * b := by
-      sorry
-    _ = a * a + 2 * (a * b) + b * b := by
-      sorry
+    (a + b) * (a + b) = a * a + b * a + (a * b + b * b) := by ring
+--      sorry
+    _ = a * a + (b * a + a * b) + b * b := by ring
+--      sorry
+    _ = a * a + 2 * (a * b) + b * b := by ring
+--      sorry
 
 end
 
@@ -105,11 +107,11 @@ end
 section
 variable (a b c d : ℝ)
 
-example : (a + b) * (c + d) = a * c + a * d + b * c + b * d := by
-  sorry
+example : (a + b) * (c + d) = a * c + a * d + b * c + b * d := by ring
+--  sorry
 
-example (a b : ℝ) : (a + b) * (a - b) = a ^ 2 - b ^ 2 := by
-  sorry
+example (a b : ℝ) : (a + b) * (a - b) = a ^ 2 - b ^ 2 := by ring
+--  sorry
 
 #check pow_two a
 #check mul_sub a b c
