@@ -100,8 +100,13 @@ example : min a b + c = min (a + c) (b + c) := by
 
 #check (abs_add : ∀ a b : ℝ, |a + b| ≤ |a| + |b|)
 
-example : |a| - |b| ≤ |a - b| :=
-  sorry
+example : |a| - |b| ≤ |a - b| := by
+--  sorry
+  have h1: |a| ≤ |a - b| + |b| := by
+    calc |a| = |(a - b) + b| := by ring
+           _ ≤ |a - b| + |b| := by apply abs_add
+  linarith
+
 end
 
 section
