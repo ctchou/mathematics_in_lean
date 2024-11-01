@@ -80,9 +80,24 @@ example : min (min a b) c = min a (min b c) := by
     apply lem2
 
 theorem aux : min a b + c ≤ min (a + c) (b + c) := by
-  sorry
+--  sorry
+  apply le_min
+  . have h1 : min a b ≤ a := by apply min_le_left
+    linarith
+  . have h2 : min a b ≤ b := by apply min_le_right
+    linarith
+
 example : min a b + c = min (a + c) (b + c) := by
-  sorry
+--  sorry
+  apply le_antisymm
+  . apply aux
+  . have h1 : min (a + c) (b + c) ≤ a + c := by apply min_le_left
+    have h2 : min (a + c) (b + c) ≤ b + c := by apply min_le_right
+    have h1' : min (a + c) (b + c) - c ≤ a := by linarith
+    have h2' : min (a + c) (b + c) - c ≤ b := by linarith
+    have h3 : min (a + c) (b + c) - c ≤ min a b := by apply le_min h1' h2'
+    linarith
+
 #check (abs_add : ∀ a b : ℝ, |a + b| ≤ |a| + |b|)
 
 example : |a| - |b| ≤ |a - b| :=
