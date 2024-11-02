@@ -35,11 +35,36 @@ variable (x y z : α)
 #check (le_sup_right : y ≤ x ⊔ y)
 #check (sup_le : x ≤ z → y ≤ z → x ⊔ y ≤ z)
 
-example : x ⊓ y = y ⊓ x := by
-  sorry
+lemma lem0 : x ⊓ y = y ⊓ x := by
+--  sorry
+  have h : ∀ a b : α, a ⊓ b ≤ b ⊓ a := by
+    intro a b
+    apply le_inf
+    apply inf_le_right
+    apply inf_le_left
+  apply le_antisymm
+  apply h
+  apply h
+
+lemma lem1 : ∀ a b c : α, a ≤ b → a ⊓ c ≤ b ⊓ c := by
+  intro a b c h
+  apply le_inf
+  . have h' : a ⊓ c ≤ a := by apply inf_le_left
+    apply le_trans h' h
+  . apply inf_le_right
 
 example : x ⊓ y ⊓ z = x ⊓ (y ⊓ z) := by
-  sorry
+--  sorry
+  have h1 : ∀ a b c : α, a ⊓ b ⊓ c ≤ a ⊓ (b ⊓ c) := by
+    intro a b c
+    apply le_inf
+    . calc a ⊓ b ⊓ c ≤ a ⊓ c := by { apply lem1 ; apply inf_le_left }
+                   _ ≤ a := by apply inf_le_left
+    . apply lem1 ; apply inf_le_right
+  apply le_antisymm
+  . apply h1
+  . rw [(lem0 x (y ⊓ z)), (lem0 (x ⊓ y) z), (lem0 y z), (lem0 x y)]
+    apply h1
 
 example : x ⊔ y = y ⊔ x := by
   sorry
@@ -109,4 +134,3 @@ example (x y : X) : 0 ≤ dist x y := by
   sorry
 
 end
-
