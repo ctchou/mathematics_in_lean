@@ -123,7 +123,16 @@ example : x ∣ x ^ 2 := by
   apply dvd_mul_left
 
 example (h : x ∣ w) : x ∣ y * (x * z) + x ^ 2 + w ^ 2 := by
-  sorry
+--  sorry
+  have h' : ∃ u, w = u * x := by
+    apply exists_eq_mul_left_of_dvd
+    exact h
+  rcases h' with ⟨u, h'⟩
+  rw [h']
+  apply dvd_iff_exists_eq_mul_left.mpr
+  use (y*z + x + u * u * x)
+  ring
+
 end
 
 section
@@ -135,5 +144,14 @@ variable (m n : ℕ)
 #check (Nat.lcm_zero_left n : Nat.lcm 0 n = 0)
 
 example : Nat.gcd m n = Nat.gcd n m := by
-  sorry
+--  sorry
+  have h : ∀ x y : ℕ, gcd x y ∣ gcd y x := by
+    intro x y
+    apply dvd_gcd
+    apply gcd_dvd_right
+    apply gcd_dvd_left
+  apply Nat.dvd_antisymm
+  apply h
+  apply h
+
 end
