@@ -35,7 +35,7 @@ variable (x y z : α)
 #check (le_sup_right : y ≤ x ⊔ y)
 #check (sup_le : x ≤ z → y ≤ z → x ⊔ y ≤ z)
 
-lemma lem0 : x ⊓ y = y ⊓ x := by
+lemma inf_lemma0 : x ⊓ y = y ⊓ x := by
 --  sorry
   have h : ∀ a b : α, a ⊓ b ≤ b ⊓ a := by
     intro a b
@@ -46,7 +46,7 @@ lemma lem0 : x ⊓ y = y ⊓ x := by
   apply h
   apply h
 
-lemma lem1 : ∀ a b c : α, a ≤ b → a ⊓ c ≤ b ⊓ c := by
+lemma inf_lemma1 : ∀ a b c : α, a ≤ b → a ⊓ c ≤ b ⊓ c := by
   intro a b c h
   apply le_inf
   . have h' : a ⊓ c ≤ a := by apply inf_le_left
@@ -58,19 +58,46 @@ example : x ⊓ y ⊓ z = x ⊓ (y ⊓ z) := by
   have h1 : ∀ a b c : α, a ⊓ b ⊓ c ≤ a ⊓ (b ⊓ c) := by
     intro a b c
     apply le_inf
-    . calc a ⊓ b ⊓ c ≤ a ⊓ c := by { apply lem1 ; apply inf_le_left }
+    . calc a ⊓ b ⊓ c ≤ a ⊓ c := by { apply inf_lemma1 ; apply inf_le_left }
                    _ ≤ a := by apply inf_le_left
-    . apply lem1 ; apply inf_le_right
+    . apply inf_lemma1 ; apply inf_le_right
   apply le_antisymm
   . apply h1
-  . rw [(lem0 x (y ⊓ z)), (lem0 (x ⊓ y) z), (lem0 y z), (lem0 x y)]
+  . rw [(inf_lemma0 x (y ⊓ z)), (inf_lemma0 (x ⊓ y) z), (inf_lemma0 y z), (inf_lemma0 x y)]
     apply h1
 
-example : x ⊔ y = y ⊔ x := by
-  sorry
+lemma sup_lemma0 : x ⊔ y = y ⊔ x := by
+--  sorry
+  have h : ∀ a b : α, a ⊔ b ≤ b ⊔ a := by
+    intro a b
+    apply sup_le
+    apply le_sup_right
+    apply le_sup_left
+  apply le_antisymm
+  apply h
+  apply h
+
+lemma sup_lemma1 : ∀ a b c : α, a ≤ b → c ⊔ a ≤ c ⊔ b := by
+--  sorry
+  intro a b c h
+  apply sup_le
+  . apply le_sup_left
+  . have h' : b ≤ c ⊔ b := by apply le_sup_right
+    apply le_trans h h'
 
 example : x ⊔ y ⊔ z = x ⊔ (y ⊔ z) := by
-  sorry
+--  sorry
+  have h1 : ∀ a b c : α, a ⊔ b ⊔ c ≤ a ⊔ (b ⊔ c) := by
+    intro a b c
+    apply sup_le
+--    . calc a ⊔ b ≤ a ⊔ (b ⊔ c) := by {
+    . apply sup_lemma1 ; apply le_sup_left
+    . calc c ≤ a ⊔ c := by { apply le_sup_right }
+          _ ≤ a ⊔ (b ⊔ c) := by { apply sup_lemma1 ; apply le_sup_right }
+  apply le_antisymm
+  . apply h1
+  . rw [(sup_lemma0 x (y ⊔ z)), (sup_lemma0 (x ⊔ y) z), (sup_lemma0 y z), (sup_lemma0 x y)]
+    apply h1
 
 theorem absorb1 : x ⊓ (x ⊔ y) = x := by
   sorry
