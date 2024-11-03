@@ -90,7 +90,6 @@ example : x ⊔ y ⊔ z = x ⊔ (y ⊔ z) := by
   have h1 : ∀ a b c : α, a ⊔ b ⊔ c ≤ a ⊔ (b ⊔ c) := by
     intro a b c
     apply sup_le
---    . calc a ⊔ b ≤ a ⊔ (b ⊔ c) := by {
     . apply sup_lemma1 ; apply le_sup_left
     . calc c ≤ a ⊔ c := by { apply le_sup_right }
           _ ≤ a ⊔ (b ⊔ c) := by { apply sup_lemma1 ; apply le_sup_right }
@@ -100,10 +99,20 @@ example : x ⊔ y ⊔ z = x ⊔ (y ⊔ z) := by
     apply h1
 
 theorem absorb1 : x ⊓ (x ⊔ y) = x := by
-  sorry
+--  sorry
+  apply le_antisymm
+  . apply inf_le_left
+  . apply le_inf
+    . apply le_refl
+    . apply le_sup_left
 
 theorem absorb2 : x ⊔ x ⊓ y = x := by
-  sorry
+--  sorry
+  apply le_antisymm
+  . apply sup_le
+    . apply le_refl
+    . apply inf_le_left
+  . apply le_sup_left
 
 end
 
