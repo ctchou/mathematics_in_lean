@@ -163,15 +163,25 @@ example (ef : FnEven f) (eg : FnEven g) : FnEven fun x ↦ f x + g x := by
     (fun x ↦ f x + g x) x = f x + g x := rfl
     _ = f (-x) + g (-x) := by rw [ef, eg]
 
-
 example (of : FnOdd f) (og : FnOdd g) : FnEven fun x ↦ f x * g x := by
-  sorry
+--  sorry
+  intro x
+  simp
+  rw [of x, og x]
+  ring
 
 example (ef : FnEven f) (og : FnOdd g) : FnOdd fun x ↦ f x * g x := by
-  sorry
+--  sorry
+  intro x
+  simp
+  rw [ef x, og x]
+  ring
 
 example (ef : FnEven f) (og : FnOdd g) : FnEven fun x ↦ f (g x) := by
-  sorry
+--  sorry
+  intro x
+  simp
+  rw [ef (g x), og, neg_neg]
 
 end
 
