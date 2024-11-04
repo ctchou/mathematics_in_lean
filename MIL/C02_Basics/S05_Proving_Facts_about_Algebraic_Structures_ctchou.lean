@@ -183,6 +183,11 @@ variable (x y z : X)
 #check (dist_triangle x y z : dist x z ≤ dist x y + dist y z)
 
 example (x y : X) : 0 ≤ dist x y := by
-  sorry
+--  sorry
+  have h : 0 ≤ 2 * (dist x y) := by
+    calc 0 = dist x x := by rw [dist_self]
+         _ ≤ dist x y + dist y x := by apply dist_triangle
+         _ = 2 * (dist x y) := by {rw [← dist_comm x y] ; ring}
+  linarith
 
 end
