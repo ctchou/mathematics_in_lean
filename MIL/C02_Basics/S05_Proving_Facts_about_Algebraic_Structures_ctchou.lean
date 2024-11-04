@@ -147,19 +147,30 @@ variable (a b c : R)
 
 #check (mul_nonneg : 0 ≤ a → 0 ≤ b → 0 ≤ a * b)
 
-example (h : a ≤ b) : 0 ≤ b - a := by
+lemma aux1 (h : a ≤ b) : 0 ≤ b - a := by
 --  sorry
- calc 0 = -a + a := by simp
+ calc 0 = -a + a := by abel
       _ ≤ -a + b := by apply add_le_add_left h
-      _ = b + -a := by rw [add_comm]
-      _ = b - a := by { rw [← sub_eq_add_neg] }
+      _ = b - a := by abel
 
-
-example (h: 0 ≤ b - a) : a ≤ b := by
-  sorry
+lemma aux2 (h: 0 ≤ b - a) : a ≤ b := by
+--  sorry
+  calc a = a + 0 := by abel
+       _ ≤ a + (b - a) := by apply add_le_add_left h
+       _ = b := by abel
 
 example (h : a ≤ b) (h' : 0 ≤ c) : a * c ≤ b * c := by
-  sorry
+--  sorry
+  have h1 : 0 ≤ b - a := by
+    apply aux1
+    exact h
+  apply aux2
+  have h2 : 0 ≤ (b - a) * c := by
+    apply mul_nonneg
+    . exact h1
+    . exact h'
+  calc 0 ≤ (b - a) * c := by apply h2
+       _ = b * c - a * c := by noncomm_ring
 
 end
 
