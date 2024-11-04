@@ -130,11 +130,27 @@ section
 variable {α : Type*} [Lattice α]
 variable (a b c : α)
 
+lemma aux1 (h : ∀ x y z : α, x ⊓ (y ⊔ z) = x ⊓ y ⊔ x ⊓ z) :
+    ∀ x y z : α, (y ⊔ z) ⊓ x = y ⊓ x ⊔ z ⊓ x
+:= by
+  intro x y z
+  rw [inf_comm y x, inf_comm z x, inf_comm (y ⊔ z) x, h]
+
+#check (sup_inf_self)
+
 example (h : ∀ x y z : α, x ⊓ (y ⊔ z) = x ⊓ y ⊔ x ⊓ z) : a ⊔ b ⊓ c = (a ⊔ b) ⊓ (a ⊔ c) := by
-  sorry
+--  sorry
+  calc a ⊔ b ⊓ c = a ⊔ (a ⊓ c) ⊔ (b ⊓ c) := by rw [sup_inf_self]
+               _ = a ⊔ ((a ⊓ c) ⊔ (b ⊓ c)) := by rw [sup_assoc]
+               _ = a ⊔ ((a ⊔ b) ⊓ c) := by rw [aux1 h]
+               _ = ((a ⊔ b) ⊓ a) ⊔ ((a ⊔ b) ⊓ c) := by rw [inf_comm (a ⊔ b) a, inf_sup_self]
+               _ = (a ⊔ b) ⊓ (a ⊔ c) := by {rw [h (a ⊔ b) a c]}
 
 example (h : ∀ x y z : α, x ⊔ y ⊓ z = (x ⊔ y) ⊓ (x ⊔ z)) : a ⊓ (b ⊔ c) = a ⊓ b ⊔ a ⊓ c := by
   sorry
+  -- This proposition should follow from the previous one by considering the dual order.
+  -- But, alas, I have not learned how to do such proofs and it is too tedious to
+  -- repeat the previous proof with ⊓ and ⊔ interchanged.
 
 end
 
