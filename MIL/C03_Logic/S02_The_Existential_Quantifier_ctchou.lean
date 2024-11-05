@@ -144,7 +144,11 @@ example (divab : a ∣ b) (divbc : b ∣ c) : a ∣ c := by
   use d * e; ring
 
 example (divab : a ∣ b) (divac : a ∣ c) : a ∣ b + c := by
-  sorry
+--  sorry
+  rcases divab with ⟨b', rfl⟩
+  rcases divac with ⟨c', rfl⟩
+  use (b' + c')
+  ring
 
 end
 
@@ -158,7 +162,11 @@ example {c : ℝ} : Surjective fun x ↦ x + c := by
   dsimp; ring
 
 example {c : ℝ} (h : c ≠ 0) : Surjective fun x ↦ c * x := by
-  sorry
+--  sorry
+  intro b
+  simp
+  use (b/c)
+  field_simp
 
 example (x y : ℝ) (h : x - y ≠ 0) : (x ^ 2 - y ^ 2) / (x - y) = x + y := by
   field_simp [h]
@@ -178,6 +186,12 @@ variable {α : Type*} {β : Type*} {γ : Type*}
 variable {g : β → γ} {f : α → β}
 
 example (surjg : Surjective g) (surjf : Surjective f) : Surjective fun x ↦ g (f x) := by
-  sorry
+--  sorry
+  intro c
+  simp
+  rcases surjg c with ⟨b, gb_c⟩
+  rcases surjf b with ⟨a, fa_b⟩
+  use a
+  rw [fa_b, gb_c]
 
 end
