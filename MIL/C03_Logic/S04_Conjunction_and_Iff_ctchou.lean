@@ -124,12 +124,22 @@ example {x y : ℝ} : x ≤ y ∧ ¬y ≤ x ↔ x ≤ y ∧ x ≠ y := by
 theorem aux {x y : ℝ} (h : x ^ 2 + y ^ 2 = 0) : x = 0 := by
   have h' : x ^ 2 = 0 := by
   -- sorry
+    have hx2 : 0 ≤ x^2 := by apply pow_two_nonneg
+    have hy2 : 0 ≤ y^2 := by apply pow_two_nonneg
+    have : x^2 = 0 := by linarith
+  exact pow_eq_zero h'
 
-
-  --pow_eq_zero h'
-
-example (x y : ℝ) : x ^ 2 + y ^ 2 = 0 ↔ x = 0 ∧ y = 0 :=
-  sorry
+example (x y : ℝ) : x ^ 2 + y ^ 2 = 0 ↔ x = 0 ∧ y = 0 := by
+--  sorry
+  constructor
+  . intro h
+    constructor
+    . exact aux h
+    . rw [add_comm] at h
+      exact aux h
+  . rintro ⟨hx, hy⟩
+    rw [hx, hy]
+    norm_num
 
 section
 
@@ -145,12 +155,17 @@ example : 3 ∣ Nat.gcd 6 15 := by
 end
 
 theorem not_monotone_iff {f : ℝ → ℝ} : ¬Monotone f ↔ ∃ x y, x ≤ y ∧ f x > f y := by
+--  simp [Monotone]
   rw [Monotone]
   push_neg
   rfl
 
 example : ¬Monotone fun x : ℝ ↦ -x := by
-  sorry
+--  sorry
+  simp [Monotone]
+  use 0
+  use 1
+  norm_num
 
 section
 variable {α : Type*} [PartialOrder α]
@@ -158,7 +173,18 @@ variable (a b : α)
 
 example : a < b ↔ a ≤ b ∧ a ≠ b := by
   rw [lt_iff_le_not_le]
-  sorry
+--  sorry
+  constructor
+  . rintro ⟨hab, hba⟩
+    use hab
+    intro heq
+    have : b ≤ a := by rw [heq]
+    contradiction
+  . rintro ⟨hab, hneq⟩
+    use hab
+    intro hba
+    have : a = b := by exact le_antisymm hab hba
+    contradiction
 
 end
 
@@ -168,10 +194,18 @@ variable (a b c : α)
 
 example : ¬a < a := by
   rw [lt_iff_le_not_le]
-  sorry
+--  sorry
+  tauto
 
 example : a < b → b < c → a < c := by
   simp only [lt_iff_le_not_le]
-  sorry
+--  sorry
+  rintro ⟨hab, hnba⟩
+  rintro ⟨hbc, hncb⟩
+  constructor
+  . exact le_trans hab hbc
+  . intro hca
+    have : b ≤ a := by exact le_trans hbc hca
+    contradiction
 
 end
