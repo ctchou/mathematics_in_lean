@@ -58,13 +58,21 @@ example {x y : ℝ} (h : x ≤ y ∧ x ≠ y) : ¬y ≤ x := by
 example {x y : ℝ} (h : x ≤ y ∧ x ≠ y) : ¬y ≤ x := by
   intro h'
   apply h.right
+  -- apply le_antisymm
+  -- . exact h.left
+  -- . exact h'
   exact le_antisymm h.left h'
 
 example {x y : ℝ} (h : x ≤ y ∧ x ≠ y) : ¬y ≤ x :=
   fun h' ↦ h.right (le_antisymm h.left h')
 
-example {m n : ℕ} (h : m ∣ n ∧ m ≠ n) : m ∣ n ∧ ¬n ∣ m :=
-  sorry
+example {m n : ℕ} (h : m ∣ n ∧ m ≠ n) : m ∣ n ∧ ¬n ∣ m := by
+--  sorry
+  constructor
+  . exact h.1
+  . intro h'
+    have : m = n := by apply dvd_antisymm h.1 h'
+    tauto
 
 example : ∃ x : ℝ, 2 < x ∧ x < 4 :=
   ⟨5 / 2, by norm_num, by norm_num⟩
@@ -101,12 +109,24 @@ example {x y : ℝ} (h : x ≤ y) : ¬y ≤ x ↔ x ≠ y := by
 example {x y : ℝ} (h : x ≤ y) : ¬y ≤ x ↔ x ≠ y :=
   ⟨fun h₀ h₁ ↦ h₀ (by rw [h₁]), fun h₀ h₁ ↦ h₀ (le_antisymm h h₁)⟩
 
-example {x y : ℝ} : x ≤ y ∧ ¬y ≤ x ↔ x ≤ y ∧ x ≠ y :=
-  sorry
+example {x y : ℝ} : x ≤ y ∧ ¬y ≤ x ↔ x ≤ y ∧ x ≠ y := by
+--  sorry
+  constructor
+  . rintro ⟨hxy, hnyx⟩
+    use hxy
+    contrapose! hnyx
+    rw [hnyx]
+  . rintro ⟨hxy, hnyx⟩
+    use hxy
+    contrapose! hnyx
+    exact le_antisymm hxy hnyx
 
-theorem aux {x y : ℝ} (h : x ^ 2 + y ^ 2 = 0) : x = 0 :=
-  have h' : x ^ 2 = 0 := by sorry
-  pow_eq_zero h'
+theorem aux {x y : ℝ} (h : x ^ 2 + y ^ 2 = 0) : x = 0 := by
+  have h' : x ^ 2 = 0 := by
+  -- sorry
+
+
+  --pow_eq_zero h'
 
 example (x y : ℝ) : x ^ 2 + y ^ 2 = 0 ↔ x = 0 ∧ y = 0 :=
   sorry
