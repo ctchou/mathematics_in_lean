@@ -110,22 +110,38 @@ theorem convergesTo_mul {s t : ℕ → ℝ} {a b : ℝ}
   · ext; ring
   ring
 
+lemma aux2 (x y : ℝ) (h : ∀ ε > 0, |x - y| < 2 * ε) : x = y := by
+  sorry
+
 theorem convergesTo_unique {s : ℕ → ℝ} {a b : ℝ}
-      (sa : ConvergesTo s a) (sb : ConvergesTo s b) :
-    a = b := by
-  by_contra abne
-  have : |a - b| > 0 := by sorry
-  let ε := |a - b| / 2
-  have εpos : ε > 0 := by
-    change |a - b| / 2 > 0
-    linarith
-  rcases sa ε εpos with ⟨Na, hNa⟩
-  rcases sb ε εpos with ⟨Nb, hNb⟩
-  let N := max Na Nb
-  have absa : |s N - a| < ε := by sorry
-  have absb : |s N - b| < ε := by sorry
-  have : |a - b| < |a - b| := by sorry
-  exact lt_irrefl _ this
+      (sa : ConvergesTo s a) (sb : ConvergesTo s b) : a = b := by
+  apply aux2
+  intro ε hε
+  have ha := sa ε hε
+  have hb := sb ε hε
+  rcases ha with ⟨Na, ha1⟩
+  rcases hb with ⟨Nb, hb1⟩
+  have ha2 := ha1 (max Na Nb) (le_max_left Na Nb)
+  have hb2 := hb1 (max Na Nb) (le_max_right Na Nb)
+  calc |a - b| = |-(s (max Na Nb) - a) + (s (max Na Nb) - b)| := by { congr ; abel }
+       _ ≤ |-(s (max Na Nb) - a)| + |s (max Na Nb) - b| := by { apply abs_add_le }
+       _ = |s (max Na Nb) - a| + |s (max Na Nb) - b| := by { rw [abs_neg] }
+       _ < ε + ε := by { apply add_lt_add ha2 hb2 }
+       _ = 2 * ε := by { linarith }
+
+  -- by_contra abne
+  -- have : |a - b| > 0 := by sorry
+  -- let ε := |a - b| / 2
+  -- have εpos : ε > 0 := by
+  --   change |a - b| / 2 > 0
+  --   linarith
+  -- rcases sa ε εpos with ⟨Na, hNa⟩
+  -- rcases sb ε εpos with ⟨Nb, hNb⟩
+  -- let N := max Na Nb
+  -- have absa : |s N - a| < ε := by sorry
+  -- have absb : |s N - b| < ε := by sorry
+  -- have : |a - b| < |a - b| := by sorry
+  -- exact lt_irrefl _ this
 
 section
 variable {α : Type*} [LinearOrder α]
