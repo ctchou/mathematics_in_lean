@@ -223,16 +223,42 @@ example : range exp = { y | y > 0 } := by
   rw [exp_log ypos]
 
 example : InjOn sqrt { x | x ≥ 0 } := by
-  sorry
+--  sorry
+  intro x
+  simp
+  intro xnneg y ynneg sqrt_eq
+  calc x = (sqrt x)^2 := by { rw [sq_sqrt xnneg] }
+       _ = (sqrt y)^2 := by { rw [sqrt_eq] }
+       _ = y := by { rw [sq_sqrt ynneg] }
 
 example : InjOn (fun x ↦ x ^ 2) { x : ℝ | x ≥ 0 } := by
-  sorry
+--  sorry
+  intro x
+  simp
+  intro xnneg y ynneg sq_eq
+  calc x = √(x^2) := by { rw [sqrt_sq xnneg] }
+       _ = √(y^2) := by { rw [sq_eq] }
+       _ = y := by { rw [sqrt_sq ynneg] }
 
 example : sqrt '' { x | x ≥ 0 } = { y | y ≥ 0 } := by
-  sorry
+--  sorry
+  ext y
+  simp
+  constructor
+  . rintro ⟨x, xnneg, sqrtx_y⟩
+    rw [← sqrtx_y]
+    apply sqrt_nonneg
+  . intro ynneg
+    use (y^2)
+    simp [pow_two_nonneg y, sqrt_sq ynneg]
 
 example : (range fun x ↦ x ^ 2) = { y : ℝ | y ≥ 0 } := by
-  sorry
+--  sorry
+  ext y
+  simp
+  constructor
+  . rintro ⟨x, x2_y⟩
+    simp [← x2_y, pow_two_nonneg x]
 
 end
 
@@ -263,11 +289,32 @@ variable (f : α → β)
 
 open Function
 
-example : Injective f ↔ LeftInverse (inverse f) f :=
-  sorry
+#print LeftInverse
+#print RightInverse
 
-example : Surjective f ↔ RightInverse (inverse f) f :=
-  sorry
+example : Injective f ↔ LeftInverse (inverse f) f := by
+--  sorry
+  constructor
+  . intro inj_f x
+    have f_inv : f (inverse f (f x)) = f x := by
+      apply inverse_spec
+      use x
+    apply inj_f f_inv
+  . intro l_inv x y fxy
+    calc x = inverse f (f x) := by rw [l_inv x]
+         _ = inverse f (f y) := by rw [fxy]
+         _ = y := by rw [l_inv y]
+
+example : Surjective f ↔ RightInverse (inverse f) f := by
+--  sorry
+  constructor
+  . intro surj_f y
+    rcases surj_f y with ⟨x, fxy⟩
+    apply inverse_spec
+    use x
+  . intro r_inv y
+    use (inverse f y)
+    exact r_inv y
 
 end
 
@@ -283,10 +330,13 @@ theorem Cantor : ∀ f : α → Set α, ¬Surjective f := by
     intro h'
     have : j ∉ f j := by rwa [h] at h'
     contradiction
-  have h₂ : j ∈ S
-  sorry
-  have h₃ : j ∉ S
-  sorry
+  have h₂ : j ∈ S := by
+--  sorry
+    unfold S
+    simp [h₁]
+  have h₃ : j ∉ S := by
+--  sorry
+    simp [← h, h₁]
   contradiction
 
 -- COMMENTS: TODO: improve this
