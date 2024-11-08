@@ -64,16 +64,32 @@ example (h : Surjective f) : u ⊆ f '' (f ⁻¹' u) := by
   . exact fxy
 
 example (h : s ⊆ t) : f '' s ⊆ f '' t := by
-  sorry
+--  sorry
+  rw [subset_def]
+  simp
+  intro x xs
+  use x
+  have xt := h xs
+  use xt
 
 example (h : u ⊆ v) : f ⁻¹' u ⊆ f ⁻¹' v := by
-  sorry
+--  sorry
+  rw [subset_def]
+  simp
+  intro x xu
+  apply h xu
 
 example : f ⁻¹' (u ∪ v) = f ⁻¹' u ∪ f ⁻¹' v := by
-  sorry
+--  sorry
+  ext
+  simp
 
 example : f '' (s ∩ t) ⊆ f '' s ∩ f '' t := by
-  sorry
+--  sorry
+  rw [subset_def]
+  simp
+  intro y x xs xt fxy
+  constructor <;> use x
 
 example (h : Injective f) : f '' s ∩ f '' t ⊆ f '' (s ∩ t) := by
   sorry
