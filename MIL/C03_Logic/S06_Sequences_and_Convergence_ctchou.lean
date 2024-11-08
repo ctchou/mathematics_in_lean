@@ -110,8 +110,14 @@ theorem convergesTo_mul {s t : ℕ → ℝ} {a b : ℝ}
   · ext; ring
   ring
 
+#check (abs_sub_pos.mpr)
+
 lemma aux2 (x y : ℝ) (h : ∀ ε > 0, |x - y| < 2 * ε) : x = y := by
-  sorry
+  by_contra! hc
+  have pos1 : 0 < |x - y| := by { apply abs_sub_pos.mpr hc }
+  have pos2 : 0 < |x - y|/2 := by { linarith }
+  have h' := h (|x - y|/2) pos2
+  linarith
 
 theorem convergesTo_unique {s : ℕ → ℝ} {a b : ℝ}
       (sa : ConvergesTo s a) (sb : ConvergesTo s b) : a = b := by
