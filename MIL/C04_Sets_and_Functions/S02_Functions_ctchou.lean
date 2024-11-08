@@ -92,42 +92,108 @@ example : f '' (s ∩ t) ⊆ f '' s ∩ f '' t := by
   constructor <;> use x
 
 example (h : Injective f) : f '' s ∩ f '' t ⊆ f '' (s ∩ t) := by
-  sorry
+--  sorry
+  rw [subset_def]
+  simp
+  intro x xs y yt fyx
+  use y
+  simp [yt, fyx]
+  have yx : y = x := h fyx
+  simp [yx, xs]
 
 example : f '' s \ f '' t ⊆ f '' (s \ t) := by
-  sorry
+--  sorry
+  simp [subset_def]
+  intro x xs ht
+  use x
+  simp [xs]
+  intro xt
+  apply ht x xt
+  rfl
 
 example : f ⁻¹' u \ f ⁻¹' v ⊆ f ⁻¹' (u \ v) := by
-  sorry
+--  sorry
+  simp [subset_def]
 
 example : f '' s ∩ v = f '' (s ∩ f ⁻¹' v) := by
-  sorry
+--  sorry
+  ext y
+  simp
+  constructor
+  . rintro ⟨⟨x, xs, fxy⟩, yv⟩
+    use x
+    simp [xs, fxy, yv]
+  . rintro ⟨x, ⟨xs, fxv⟩, fxy⟩
+    simp [← fxy, fxv]
+    use x
 
 example : f '' (s ∩ f ⁻¹' u) ⊆ f '' s ∩ u := by
-  sorry
+--  sorry
+  simp [subset_def]
+  intro y x xs fxu fxy
+  simp [← fxy, fxu]
+  use x
 
 example : s ∩ f ⁻¹' u ⊆ f ⁻¹' (f '' s ∩ u) := by
-  sorry
+--  sorry
+  simp [subset_def]
+  intro x xs fxu
+  simp [fxu]
+  use x
 
 example : s ∪ f ⁻¹' u ⊆ f ⁻¹' (f '' s ∪ u) := by
-  sorry
+--  sorry
+  simp [subset_def]
+  rintro x (xs | fxu)
+  . left ; use x
+  . right ; exact fxu
 
 variable {I : Type*} (A : I → Set α) (B : I → Set β)
 
 example : (f '' ⋃ i, A i) = ⋃ i, f '' A i := by
-  sorry
+--  sorry
+  ext y
+  simp
+  constructor
+  . rintro ⟨x, ⟨i, xai⟩, fxy⟩
+    use i
+    use x
+  . rintro ⟨i, ⟨x, xai, fxy⟩⟩
+    use x
+    simp [fxy]
+    use i
 
 example : (f '' ⋂ i, A i) ⊆ ⋂ i, f '' A i := by
-  sorry
+--  sorry
+  simp [subset_def]
+  intro x xai i
+  use x
+  simp [xai i]
 
 example (i : I) (injf : Injective f) : (⋂ i, f '' A i) ⊆ f '' ⋂ i, A i := by
-  sorry
+--  sorry
+  simp [subset_def]
+  intro y aefxy
+  have efxy := aefxy i
+  rcases efxy with ⟨x, xai, fxy⟩
+  use x
+  simp [fxy]
+  intro i'
+  have efxy' := aefxy i'
+  rcases efxy' with ⟨x', xai', fxy'⟩
+  have fxx' : f x = f x' := by simp [fxy, fxy']
+  have xx' : x = x' := by apply injf fxx'
+  simp [xx', xai']
 
 example : (f ⁻¹' ⋃ i, B i) = ⋃ i, f ⁻¹' B i := by
-  sorry
+--  sorry
+  ext x
+  simp
 
 example : (f ⁻¹' ⋂ i, B i) = ⋂ i, f ⁻¹' B i := by
-  sorry
+--  sorry
+  ext x
+  simp
 
 example : InjOn f s ↔ ∀ x₁ ∈ s, ∀ x₂ ∈ s, f x₁ = f x₂ → x₁ = x₂ :=
   Iff.refl _
