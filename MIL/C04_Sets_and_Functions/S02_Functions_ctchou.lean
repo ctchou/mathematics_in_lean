@@ -34,16 +34,34 @@ example : s ⊆ f ⁻¹' (f '' s) := by
   use x, xs
 
 example : f '' s ⊆ v ↔ s ⊆ f ⁻¹' v := by
-  sorry
+--  sorry
+  simp
 
 example (h : Injective f) : f ⁻¹' (f '' s) ⊆ s := by
-  sorry
+--  sorry
+  rw [subset_def]
+  simp
+  intro y x xs fxy
+  have xy : x = y := h fxy
+  rw [← xy]
+  exact xs
 
 example : f '' (f ⁻¹' u) ⊆ u := by
-  sorry
+--  sorry
+  rw [subset_def]
+  simp
 
 example (h : Surjective f) : u ⊆ f '' (f ⁻¹' u) := by
-  sorry
+--  sorry
+  rw [subset_def]
+  simp
+  intro y yu
+  have h' := h y
+  rcases h' with ⟨x, fxy⟩
+  use x
+  constructor
+  . rw [fxy] ; exact yu
+  . exact fxy
 
 example (h : s ⊆ t) : f '' s ⊆ f '' t := by
   sorry
