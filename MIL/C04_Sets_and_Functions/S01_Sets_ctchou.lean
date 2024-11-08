@@ -136,7 +136,7 @@ example (x : ℕ) (h : x ∈ (∅ : Set ℕ)) : False :=
 example (x : ℕ) : x ∈ (univ : Set ℕ) :=
   trivial
 
-#check (Nat.Prime.eq_two_or_odd)
+#print Nat.Prime.eq_two_or_odd
 #check (Nat.odd_iff)
 
 example : { n | Nat.Prime n } ∩ { n | n > 2 } ⊆ { n | ¬Even n } := by
@@ -184,10 +184,19 @@ section
 variable (ssubt : s ⊆ t)
 
 example (h₀ : ∀ x ∈ t, ¬Even x) (h₁ : ∀ x ∈ t, Prime x) : ∀ x ∈ s, ¬Even x ∧ Prime x := by
-  sorry
+--  sorry
+  intro x xs
+  have xt : x ∈ t := by { apply Set.mem_of_subset_of_mem ssubt xs }
+  constructor
+  . apply h₀ x xt
+  . apply h₁ x xt
 
 example (h : ∃ x ∈ s, ¬Even x ∧ Prime x) : ∃ x ∈ t, Prime x := by
-  sorry
+--  sorry
+  rcases h with ⟨x, xs, xne, xpr⟩
+  use x
+  have xt : x ∈ t := by { apply Set.mem_of_subset_of_mem ssubt xs }
+  use xt
 
 end
 
@@ -226,7 +235,20 @@ example : (⋂ i, A i ∩ B i) = (⋂ i, A i) ∩ ⋂ i, B i := by
 
 
 example : (s ∪ ⋂ i, A i) = ⋂ i, A i ∪ s := by
-  sorry
+--  sorry
+  ext x
+  simp
+  constructor
+  . rintro (xs | xai)
+    . intro i ; right ; exact xs
+    . intro i ; left ; apply xai
+  . intro h1
+    by_cases xs : x ∈ s
+    . left ; exact xs
+    . right
+      intro i
+      have h2 : x ∈ A i ∨ x ∈ s := h1 i
+      tauto
 
 def primes : Set ℕ :=
   { x | Nat.Prime x }
@@ -246,8 +268,16 @@ example : (⋂ p ∈ primes, { x | ¬p ∣ x }) ⊆ { x | x = 1 } := by
   simp
   apply Nat.exists_prime_and_dvd
 
+#print Nat.exists_infinite_primes
+
 example : (⋃ p ∈ primes, { x | x ≤ p }) = univ := by
-  sorry
+--  sorry
+  ext n
+  simp
+  have hn := Nat.exists_infinite_primes n
+  rcases hn with ⟨p, hp⟩
+  use p
+  tauto
 
 end
 
@@ -259,12 +289,14 @@ variable {α : Type*} (s : Set (Set α))
 
 example : ⋃₀ s = ⋃ t ∈ s, t := by
   ext x
-  rw [mem_iUnion₂]
+  -- rw [mem_iUnion₂]
+  -- simp
   simp
 
 example : ⋂₀ s = ⋂ t ∈ s, t := by
   ext x
-  rw [mem_iInter₂]
-  rfl
+  -- rw [mem_iInter₂]
+  -- rfl
+  simp
 
 end
