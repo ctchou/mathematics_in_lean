@@ -259,6 +259,9 @@ example : (range fun x ↦ x ^ 2) = { y : ℝ | y ≥ 0 } := by
   constructor
   . rintro ⟨x, x2_y⟩
     simp [← x2_y, pow_two_nonneg x]
+  . intro y_nneg
+    use (√ y)
+    apply sq_sqrt y_nneg
 
 end
 
