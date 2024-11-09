@@ -37,6 +37,7 @@ example : Nat.Prime 3 :=
 #check Nat.Prime.dvd_mul
 #check Nat.Prime.dvd_mul Nat.prime_two
 #check Nat.prime_two.dvd_mul
+#check Nat.dvd_gcd
 
 theorem even_of_even_sqr {m : ℕ} (h : 2 ∣ m ^ 2) : 2 ∣ m := by
   rw [pow_two, Nat.prime_two.dvd_mul] at h
@@ -51,20 +52,30 @@ example (a b c : Nat) (h : a * b = a * c) (h' : a ≠ 0) : b = c :=
 
 example {m n : ℕ} (coprime_mn : m.Coprime n) : m ^ 2 ≠ 2 * n ^ 2 := by
   intro sqr_eq
-  have : 2 ∣ m := by
-    sorry
-  obtain ⟨k, meq⟩ := dvd_iff_exists_eq_mul_left.mp this
+  have div2_m : 2 ∣ m := by
+--    sorry
+    apply even_of_even_sqr
+    simp [sqr_eq]
+  have ⟨k, meq⟩ := dvd_iff_exists_eq_mul_left.mp div2_m
   have : 2 * (2 * k ^ 2) = 2 * n ^ 2 := by
     rw [← sqr_eq, meq]
     ring
-  have : 2 * k ^ 2 = n ^ 2 :=
-    sorry
-  have : 2 ∣ n := by
-    sorry
-  have : 2 ∣ m.gcd n := by
-    sorry
+  have : 2 * k ^ 2 = n ^ 2 := by
+--    sorry
+    have pos2 : 0 < 2 := by norm_num
+    apply Nat.eq_of_mul_eq_mul_left pos2 this
+  have div2_n : 2 ∣ n := by
+--    sorry
+    apply even_of_even_sqr
+    simp [← this]
+  have div2_gcd : 2 ∣ m.gcd n := by
+--    sorry
+    apply Nat.dvd_gcd div2_m div2_n
   have : 2 ∣ 1 := by
-    sorry
+--    sorry
+    unfold Nat.Coprime at coprime_mn
+    rw [coprime_mn] at div2_gcd
+    exact div2_gcd
   norm_num at this
 
 example {m n p : ℕ} (coprime_mn : m.Coprime n) (prime_p : p.Prime) : m ^ 2 ≠ p * n ^ 2 := by
@@ -117,4 +128,3 @@ example {m n k r : ℕ} (nnz : n ≠ 0) (pow_eq : m ^ k = r * n ^ k) {p : ℕ} :
   sorry
 
 #check multiplicity
-
