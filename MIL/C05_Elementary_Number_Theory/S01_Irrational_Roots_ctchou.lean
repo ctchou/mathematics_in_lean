@@ -62,8 +62,8 @@ example {m n : ℕ} (coprime_mn : m.Coprime n) : m ^ 2 ≠ 2 * n ^ 2 := by
     ring
   have : 2 * k ^ 2 = n ^ 2 := by
 --    sorry
-    have pos2 : 0 < 2 := by norm_num
-    apply Nat.eq_of_mul_eq_mul_left pos2 this
+    have pos_2 : 0 < 2 := by norm_num
+    apply Nat.eq_of_mul_eq_mul_left pos_2 this
   have div2_n : 2 ∣ n := by
 --    sorry
     apply even_of_even_sqr
@@ -78,8 +78,39 @@ example {m n : ℕ} (coprime_mn : m.Coprime n) : m ^ 2 ≠ 2 * n ^ 2 := by
     exact div2_gcd
   norm_num at this
 
+theorem divp_of_divp_sqr {m p : ℕ} (prime_p : p.Prime) (h : p ∣ m ^ 2) : p ∣ m := by
+  rw [pow_two, Nat.Prime.dvd_mul prime_p] at h
+  cases h <;> assumption
+
 example {m n p : ℕ} (coprime_mn : m.Coprime n) (prime_p : p.Prime) : m ^ 2 ≠ p * n ^ 2 := by
-  sorry
+--  sorry
+  intro sqr_eq
+  have p_ge_2 : 2 ≤ p := Nat.Prime.two_le prime_p
+  have divp_m : p ∣ m := by
+    apply divp_of_divp_sqr prime_p
+    simp [sqr_eq]
+  have ⟨k, meq⟩ := dvd_iff_exists_eq_mul_left.mp divp_m
+  have : p * (p * k ^ 2) = p * n ^ 2 := by
+    rw [← sqr_eq, meq]
+    ring
+  have : p * k ^ 2 = n ^ 2 := by
+    have pos_p : 0 < p := by linarith
+    apply Nat.eq_of_mul_eq_mul_left pos_p this
+  have divp_n : p ∣ n := by
+    apply divp_of_divp_sqr prime_p
+    simp [← this]
+  have divp_gcd : p ∣ m.gcd n := by
+    apply Nat.dvd_gcd divp_m divp_n
+  have : p ∣ 1 := by
+    unfold Nat.Coprime at coprime_mn
+    rw [coprime_mn] at divp_gcd
+    exact divp_gcd
+  have : p ≤ 1 := by
+    apply Nat.le_of_dvd
+    . linarith
+    . exact this
+  linarith
+
 #check Nat.primeFactorsList
 #check Nat.prime_of_mem_primeFactorsList
 #check Nat.prod_primeFactorsList
