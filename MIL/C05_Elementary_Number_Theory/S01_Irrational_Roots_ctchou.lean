@@ -133,11 +133,16 @@ theorem Nat.Prime.factorization' {p : ℕ} (prime_p : p.Prime) :
 
 example {m n p : ℕ} (nnz : n ≠ 0) (prime_p : p.Prime) : m ^ 2 ≠ p * n ^ 2 := by
   intro sqr_eq
+  have p_nez : p ≠ 0 := by
+    linarith [(Nat.prime_def_lt.mp prime_p).1]
   have nsqr_nez : n ^ 2 ≠ 0 := by simpa
   have eq1 : Nat.factorization (m ^ 2) p = 2 * m.factorization p := by
-    sorry
+--    sorry
+    rw [factorization_pow' m 2 p]
   have eq2 : (p * n ^ 2).factorization p = 2 * n.factorization p + 1 := by
-    sorry
+--    sorry
+    rw [factorization_mul' p_nez nsqr_nez, factorization_pow' n 2 p, Nat.Prime.factorization' prime_p]
+    abel
   have : 2 * m.factorization p % 2 = (2 * n.factorization p + 1) % 2 := by
     rw [← eq1, sqr_eq, eq2]
   rw [add_comm, Nat.add_mul_mod_self_left, Nat.mul_mod_right] at this
@@ -149,13 +154,17 @@ example {m n k r : ℕ} (nnz : n ≠ 0) (pow_eq : m ^ k = r * n ^ k) {p : ℕ} :
   · simp
   have npow_nz : n ^ k ≠ 0 := fun npowz ↦ nnz (pow_eq_zero npowz)
   have eq1 : (m ^ k).factorization p = k * m.factorization p := by
-    sorry
+--    sorry
+    rw [factorization_pow' m k p]
   have eq2 : ((r + 1) * n ^ k).factorization p =
       k * n.factorization p + (r + 1).factorization p := by
-    sorry
+--    sorry
+    rw [factorization_mul' r.succ_ne_zero npow_nz, factorization_pow' n k p]
+    abel
   have : r.succ.factorization p = k * m.factorization p - k * n.factorization p := by
     rw [← eq1, pow_eq, eq2, add_comm, Nat.add_sub_cancel]
   rw [this]
-  sorry
+--  sorry
+  simp [← Nat.mul_sub]
 
 #check multiplicity
