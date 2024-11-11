@@ -1,6 +1,9 @@
 import Mathlib.Data.Nat.GCD.Basic
 import MIL.Common
 
+#check Nat
+#check Nat.factorial
+
 example (n : Nat) : n.succ ≠ Nat.zero :=
   Nat.succ_ne_zero n
 
@@ -48,7 +51,15 @@ theorem dvd_fac {i n : ℕ} (ipos : 0 < i) (ile : i ≤ n) : i ∣ fac n := by
 theorem pow_two_le_fac (n : ℕ) : 2 ^ (n - 1) ≤ fac n := by
   rcases n with _ | n
   · simp [fac]
-  sorry
+--  sorry
+  simp
+  induction' n with n ih
+  . simp [fac]
+  unfold fac
+  calc 2 ^ (n + 1) = 2 * 2^n := by { rw [pow_succ'] }
+       _ ≤ 2 * fac (n + 1) := by { linarith [ih] }
+       _ ≤ (n + 1 + 1) * fac (n + 1) := by { apply Nat.mul_le_mul_right ; linarith }
+
 section
 
 variable {α : Type*} (s : Finset ℕ) (f : ℕ → ℕ) (n : ℕ)
