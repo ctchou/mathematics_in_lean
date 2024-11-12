@@ -154,12 +154,17 @@ theorem primes_infinite' : ∀ s : Finset Nat, ∃ p, Nat.Prime p ∧ p ∉ s :=
     linarith [Finset.prod_pos all_pos]
   rcases exists_prime_factor this with ⟨p, pp, pdvd⟩
   have : p ∣ ∏ i in s', i := by
-    sorry
+--    sorry
+    apply Finset.dvd_prod_of_mem
+    simp [s'_def, pp]
+    apply h p pp
   have : p ∣ 1 := by
     convert Nat.dvd_sub' pdvd this
     simp
   show False
-  sorry
+--  sorry
+  rw [Nat.dvd_one] at this
+  linarith [Nat.Prime.one_lt pp]
 
 theorem bounded_of_ex_finset (Q : ℕ → Prop) :
     (∃ s : Finset ℕ, ∀ k, Q k → k ∈ s) → ∃ n, ∀ k, Q k → k < n := by
