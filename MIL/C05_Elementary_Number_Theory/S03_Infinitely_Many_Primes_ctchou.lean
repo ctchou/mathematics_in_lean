@@ -251,15 +251,30 @@ example (m n : ℕ) (s : Finset ℕ) (h : m ∈ erase s n) : m ≠ n ∧ m ∈ s
   simp at h
   assumption
 
-lemma aux_dvd_prod {p : ℕ} {s : Finset ℕ} (hp : Nat.Prime p) : (p ∣ ∏ i in s, i) ↔ p ∈ s := by
-  sorry
-
-lemma aux1 {p : ℕ} {s : Finset ℕ} : p ∈ s → (p ∣ ∏ i in s, i) := by
+lemma aux1 {p : ℕ} {s : Finset ℕ} : p ∈ s → (p ∣ ∏ i ∈ s, i) := by
 --  sorry
   induction' s using Finset.induction_on with a s ans ih
   . simp
+  simp [Finset.prod_insert ans]
+  rintro (pa | ps)
+  . simp [pa]
+  . have := ih ps
+    apply Dvd.dvd.mul_left this a
+
+lemma aux2 {p : ℕ} {s : Finset ℕ} (hp : Nat.Prime p) (hs : ∀ i ∈ s, Nat.Prime i) (hd : p ∣ ∏ i in s, i) : p ∈ s := by
+  induction' s using Finset.induction_on with a s ans ih
+  . simp at hd
+    linarith [Nat.Prime.one_lt hp]
   simp
-  sorry
+  simp at hs
+  simp [Finset.prod_insert ans, Nat.Prime.dvd_mul hp] at hd
+  rcases hd with pa | ps
+  . left
+    have := Nat.Prime.one_lt hp
+    simp [Nat.dvd_prime hs.1] at pa
+    rcases pa <;> linarith
+  . right
+    apply ih hs.2 ps
 
 theorem primes_mod_4_eq_3_infinite : ∀ n, ∃ p > n, Nat.Prime p ∧ p % 4 = 3 := by
   by_contra h
@@ -284,12 +299,18 @@ theorem primes_mod_4_eq_3_infinite : ∀ n, ∃ p > n, Nat.Prime p ∧ p % 4 = 3
 --    sorry
     intro peq3
     simp [peq3] at pp
-    simp [peq3, Nat.Prime.dvd_mul pp, (by norm_num : ¬ 3 ∣ 4), aux_dvd_prod pp] at pdvd
+    simp [peq3, Nat.Prime.dvd_mul pp, (by norm_num : ¬ 3 ∣ 4)] at pdvd
+    have : ∀ i ∈ erase s 3, Nat.Prime i := by
+      simp
+      intro i _ is
+      apply ((hs i).mpr is).1
+    have erase_3 := aux2 Nat.prime_three this pdvd
+    simp at erase_3
   have : p ∣ 4 * ∏ i in erase s 3, i := by
 --    sorry
-    simp [Nat.Prime.dvd_mul pp, (by norm_num : ¬ 3 ∣ 4), aux_dvd_prod pp]
-    right
-    constructor <;> assumption
+    have : p ∈ erase s 3 := by simp [ps, pne3]
+    have := aux1 this
+    apply Dvd.dvd.mul_left this 4
   have p_dvd_3 : p ∣ 3 := by
 --    sorry
     have dvd_diff := Nat.dvd_sub' pdvd this
