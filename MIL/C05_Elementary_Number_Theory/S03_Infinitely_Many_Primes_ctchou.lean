@@ -203,7 +203,13 @@ theorem two_le_of_mod_4_eq_3 {n : ℕ} (h : n % 4 = 3) : 2 ≤ n := by
       norm_num at h
 
 theorem aux {m n : ℕ} (h₀ : m ∣ n) (h₁ : 2 ≤ m) (h₂ : m < n) : n / m ∣ n ∧ n / m < n := by
-  sorry
+--  sorry
+  constructor
+  . apply Nat.div_dvd_of_dvd h₀
+  . have h₃ : 0 < n := by apply Nat.zero_lt_of_lt h₂
+    have h₄ : 1 < m := by apply Nat.lt_of_lt_of_le (by norm_num : 1 < 2) h₁
+    apply Nat.div_lt_self h₃ h₄
+
 theorem exists_prime_factor_mod_4_eq_3 {n : Nat} (h : n % 4 = 3) :
     ∃ p : Nat, p.Prime ∧ p ∣ n ∧ p % 4 = 3 := by
   by_cases np : n.Prime
@@ -222,14 +228,38 @@ theorem exists_prime_factor_mod_4_eq_3 {n : Nat} (h : n % 4 = 3) :
     apply mod_4_eq_3_or_mod_4_eq_3
     rw [neq, h]
   rcases this with h1 | h1
-  . sorry
-  . sorry
+--  . sorry
+  . by_cases prime_m : Nat.Prime m
+    . use m
+    . rcases ih m mltn h1 prime_m with ⟨p, prime_p, p_dvd_m, p_mod4_3⟩
+      use p
+      simp [prime_p, p_mod4_3]
+      apply dvd_trans p_dvd_m mdvdn
+--  . sorry
+  . rcases aux mdvdn mge2 mltn with ⟨nm_dvd_n, nm_lt_n⟩
+    by_cases prime_nm : Nat.Prime (n/m)
+    . use (n/m)
+    . rcases ih (n/m) (nm_lt_n) h1 prime_nm with ⟨p, prime_p, p_dvd_nm, p_mod4_3⟩
+      use p
+      simp [prime_p, p_mod4_3]
+      apply dvd_trans p_dvd_nm nm_dvd_n
+
 example (m n : ℕ) (s : Finset ℕ) (h : m ∈ erase s n) : m ≠ n ∧ m ∈ s := by
   rwa [mem_erase] at h
 
 example (m n : ℕ) (s : Finset ℕ) (h : m ∈ erase s n) : m ≠ n ∧ m ∈ s := by
   simp at h
   assumption
+
+lemma aux_dvd_prod {p : ℕ} {s : Finset ℕ} (hp : Nat.Prime p) : (p ∣ ∏ i in s, i) ↔ p ∈ s := by
+  sorry
+
+lemma aux1 {p : ℕ} {s : Finset ℕ} : p ∈ s → (p ∣ ∏ i in s, i) := by
+--  sorry
+  induction' s using Finset.induction_on with a s ans ih
+  . simp
+  simp
+  sorry
 
 theorem primes_mod_4_eq_3_infinite : ∀ n, ∃ p > n, Nat.Prime p ∧ p % 4 = 3 := by
   by_contra h
@@ -243,16 +273,31 @@ theorem primes_mod_4_eq_3_infinite : ∀ n, ∃ p > n, Nat.Prime p ∧ p % 4 = 3
     exact ⟨p, pltn, pp, p4⟩
   rcases this with ⟨s, hs⟩
   have h₁ : ((4 * ∏ i in erase s 3, i) + 3) % 4 = 3 := by
-    sorry
+--    sorry
+    rw [add_comm, Nat.add_mul_mod_self_left]
   rcases exists_prime_factor_mod_4_eq_3 h₁ with ⟨p, pp, pdvd, p4eq⟩
   have ps : p ∈ s := by
-    sorry
+--    sorry
+    apply (hs p).mp
+    simp [pp, p4eq]
   have pne3 : p ≠ 3 := by
-    sorry
+--    sorry
+    intro peq3
+    simp [peq3] at pp
+    simp [peq3, Nat.Prime.dvd_mul pp, (by norm_num : ¬ 3 ∣ 4), aux_dvd_prod pp] at pdvd
   have : p ∣ 4 * ∏ i in erase s 3, i := by
-    sorry
-  have : p ∣ 3 := by
-    sorry
+--    sorry
+    simp [Nat.Prime.dvd_mul pp, (by norm_num : ¬ 3 ∣ 4), aux_dvd_prod pp]
+    right
+    constructor <;> assumption
+  have p_dvd_3 : p ∣ 3 := by
+--    sorry
+    have dvd_diff := Nat.dvd_sub' pdvd this
+    simp at dvd_diff ; assumption
   have : p = 3 := by
-    sorry
+--    sorry
+    have pne1 : ¬ p = 1 := by linarith [Nat.Prime.one_lt pp]
+    have p1p3 := (Nat.dvd_prime Nat.prime_three).mp p_dvd_3
+    simp [pne1] at p1p3
+    assumption
   contradiction
