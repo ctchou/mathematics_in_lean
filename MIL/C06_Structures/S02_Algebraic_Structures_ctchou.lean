@@ -1,7 +1,11 @@
 import MIL.Common
 import Mathlib.Data.Real.Basic
+import Mathlib.Algebra.Category.GroupCat.Basic
 
 namespace C06S02
+
+#check Group
+#print Group
 
 structure Group₁ (α : Type*) where
   mul : α → α → α
