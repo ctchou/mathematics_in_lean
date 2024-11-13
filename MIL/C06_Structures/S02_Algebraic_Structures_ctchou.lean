@@ -57,6 +57,8 @@ def permGroup {α : Type*} : Group₁ (Equiv.Perm α)
   mul_one := Equiv.refl_trans
   inv_mul_cancel := Equiv.self_trans_symm
 
+#check permGroup.mul
+
 structure AddGroup₁ (α : Type*) where
   -- fill in the rest
   add : α → α → α
@@ -126,6 +128,8 @@ class Group₂ (α : Type*) where
   one_mul : ∀ x : α, mul one x = x
   inv_mul_cancel : ∀ x : α, mul (inv x) x = one
 
+#check Group₂.mul
+
 instance {α : Type*} : Group₂ (Equiv.Perm α) where
   mul f g := Equiv.trans g f
   one := Equiv.refl α
@@ -136,6 +140,14 @@ instance {α : Type*} : Group₂ (Equiv.Perm α) where
   inv_mul_cancel := Equiv.self_trans_symm
 
 #check Group₂.mul
+
+section
+variable {β : Type*} {G : Group₂ β}
+
+#check Group₂
+#check G.mul
+
+end
 
 def mySquare {α : Type*} [Group₂ α] (x : α) :=
   Group₂.mul x x
@@ -172,13 +184,16 @@ example : x + y = Point.add x y :=
 
 end
 
-instance hasMulGroup₂ {α : Type*} [Group₂ α] : Mul α :=
+--instance hasMulGroup₂ {α : Type*} [Group₂ α] : Mul α :=
+instance {α : Type*} [Group₂ α] : Mul α :=
   ⟨Group₂.mul⟩
 
-instance hasOneGroup₂ {α : Type*} [Group₂ α] : One α :=
+--instance hasOneGroup₂ {α : Type*} [Group₂ α] : One α :=
+instance {α : Type*} [Group₂ α] : One α :=
   ⟨Group₂.one⟩
 
-instance hasInvGroup₂ {α : Type*} [Group₂ α] : Inv α :=
+--instance hasInvGroup₂ {α : Type*} [Group₂ α] : Inv α :=
+instance {α : Type*} [Group₂ α] : Inv α :=
   ⟨Group₂.inv⟩
 
 section
