@@ -81,14 +81,19 @@ theorem addAlt_comm (a b : Point) : addAlt a b = addAlt b a := by
   repeat' apply add_comm
 
 protected theorem add_assoc (a b c : Point) : (a.add b).add c = a.add (b.add c) := by
-  sorry
+--  sorry
+  simp [add, add_assoc]
 
-def smul (r : ℝ) (a : Point) : Point :=
-  sorry
+def smul (r : ℝ) (a : Point) : Point where
+--  sorry
+  x := r * a.x
+  y := r * a.y
+  z := r * a.z
 
 theorem smul_distrib (r : ℝ) (a b : Point) :
     (smul r a).add (smul r b) = smul r (a.add b) := by
-  sorry
+--  sorry
+  simp [smul, add, mul_add]
 
 end Point
 
@@ -125,9 +130,28 @@ def midpoint (a b : StandardTwoSimplex) : StandardTwoSimplex
   z_nonneg := div_nonneg (add_nonneg a.z_nonneg b.z_nonneg) (by norm_num)
   sum_eq := by field_simp; linarith [a.sum_eq, b.sum_eq]
 
+lemma aux1 {lambda a b : Real} (lambda_nonneg : 0 ≤ lambda) (lambda_le : lambda ≤ 1) (a_nonneg : 0 ≤ a) (b_nonneg : 0 ≤ b) :
+    0 ≤ lambda * a + (1 - lambda) * b
+:= by
+  have h0 : 0 ≤ 1 - lambda := by linarith
+  have h1 : 0 ≤ lambda * a := by apply mul_nonneg lambda_nonneg a_nonneg
+  have h2 : 0 ≤ (1 - lambda) * b := by apply mul_nonneg h0 b_nonneg
+  linarith
+
 def weightedAverage (lambda : Real) (lambda_nonneg : 0 ≤ lambda) (lambda_le : lambda ≤ 1)
-    (a b : StandardTwoSimplex) : StandardTwoSimplex :=
-  sorry
+    (a b : StandardTwoSimplex) : StandardTwoSimplex where
+--  sorry
+  x := lambda * a.x + (1 - lambda) * b.x
+  y := lambda * a.y + (1 - lambda) * b.y
+  z := lambda * a.z + (1 - lambda) * b.z
+  x_nonneg := aux1 lambda_nonneg lambda_le a.x_nonneg b.x_nonneg
+  y_nonneg := aux1 lambda_nonneg lambda_le a.y_nonneg b.y_nonneg
+  z_nonneg := aux1 lambda_nonneg lambda_le a.z_nonneg b.z_nonneg
+  sum_eq := by
+    calc lambda * a.x + (1 - lambda) * b.x + (lambda * a.y + (1 - lambda) * b.y) + (lambda * a.z + (1 - lambda) * b.z)
+         = lambda * (a.x + a.y + a.z) + (1 - lambda) * (b.x + b.y + b.z) := by ring
+       _ = lambda * 1 + (1 - lambda) * 1 := by simp [a.sum_eq, b.sum_eq]
+       _ = 1 := by ring
 
 end
 
@@ -198,6 +222,7 @@ def StdSimplex := Σ n : ℕ, StandardSimplex n
 
 section
 variable (s : StdSimplex)
+variable (t : StandardSimplex' 3)
 
 #check s.fst
 #check s.snd
@@ -205,5 +230,7 @@ variable (s : StdSimplex)
 #check s.1
 #check s.2
 
-end
+#check t.1
+#check t.2
 
+end
