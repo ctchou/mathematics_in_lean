@@ -1,6 +1,6 @@
 import MIL.Common
 import Mathlib.Data.Real.Basic
-import Mathlib.Algebra.Category.GroupCat.Basic
+-- import Mathlib.Algebra.Category.GroupCat.Basic
 
 namespace C06S02
 
@@ -58,8 +58,15 @@ def permGroup {α : Type*} : Group₁ (Equiv.Perm α)
   inv_mul_cancel := Equiv.self_trans_symm
 
 structure AddGroup₁ (α : Type*) where
-  (add : α → α → α)
   -- fill in the rest
+  add : α → α → α
+  zero : α
+  neg : α → α
+  add_assoc : ∀ x y z : α, add (add x y) z = add x (add y z)
+  add_zero : ∀ x : α, add x zero = x
+  zero_add : ∀ x : α, add zero x = x
+  neg_add_cancel : ∀ x : α, add (neg x) x = zero
+
 @[ext]
 structure Point where
   x : ℝ
@@ -71,11 +78,23 @@ namespace Point
 def add (a b : Point) : Point :=
   ⟨a.x + b.x, a.y + b.y, a.z + b.z⟩
 
-def neg (a : Point) : Point := sorry
+def neg (a : Point) : Point :=
+-- sorry
+  ⟨-a.x, -a.y, -a.z⟩
 
-def zero : Point := sorry
+def zero : Point :=
+-- sorry
+  ⟨0, 0, 0⟩
 
-def addGroupPoint : AddGroup₁ Point := sorry
+def addGroupPoint : AddGroup₁ Point where
+-- sorry
+  add := add
+  neg := neg
+  zero := zero
+  add_assoc := by { simp [add, add_assoc] }
+  add_zero := by { simp [add, zero] }
+  zero_add := by { simp [add, zero] }
+  neg_add_cancel := by { simp [add, neg, zero] }
 
 end Point
 
