@@ -198,13 +198,36 @@ def norm (x : GaussInt) :=
 
 @[simp]
 theorem norm_nonneg (x : GaussInt) : 0 ≤ norm x := by
-  sorry
+--  sorry
+  simp [norm]
+  linarith [sq_nonneg x.re, sq_nonneg x.im]
+
 theorem norm_eq_zero (x : GaussInt) : norm x = 0 ↔ x = 0 := by
-  sorry
+--  sorry
+  simp [norm]
+  constructor
+  . intro h
+    rw [sq_add_sq_eq_zero x.re x.im] at h
+    have ⟨hr, hi⟩ := h
+    ext <;> simp [hr, hi]
+  . intro h
+    simp [h]
+
 theorem norm_pos (x : GaussInt) : 0 < norm x ↔ x ≠ 0 := by
-  sorry
+--  sorry
+  constructor
+  . intro hn hx
+    simp [hx, norm] at hn
+  . contrapose!
+    intro hle
+    have heq : x.norm = 0 := by apply le_antisymm hle (norm_nonneg x)
+    apply (norm_eq_zero x).mp heq
+
 theorem norm_mul (x y : GaussInt) : norm (x * y) = norm x * norm y := by
-  sorry
+--  sorry
+  simp [norm]
+  ring
+
 def conj (x : GaussInt) : GaussInt :=
   ⟨x.re, -x.im⟩
 
@@ -249,6 +272,9 @@ theorem norm_mod_lt (x : GaussInt) {y : GaussInt} (hy : y ≠ 0) :
         apply Int.ediv_lt_of_lt_mul
         · norm_num
         · linarith
+
+#check Int.natAbs
+#check Int.natAbs_of_nonneg
 
 theorem coe_natAbs_norm (x : GaussInt) : (x.norm.natAbs : ℤ) = x.norm :=
   Int.natAbs_of_nonneg (norm_nonneg _)
