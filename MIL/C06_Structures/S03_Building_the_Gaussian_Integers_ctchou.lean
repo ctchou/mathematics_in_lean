@@ -80,6 +80,8 @@ theorem mul_re (x y : GaussInt) : (x * y).re = x.re * y.re - x.im * y.im :=
 theorem mul_im (x y : GaussInt) : (x * y).im = x.re * y.im + x.im * y.re :=
   rfl
 
+--instance : CommRing GaussInt := _
+
 instance instCommRing : CommRing GaussInt where
   zero := 0
   one := 1
@@ -171,16 +173,24 @@ theorem abs_mod'_le (a b : ℤ) (h : 0 < b) : |mod' a b| ≤ b / 2 := by
   have := Int.emod_lt_of_pos (a + b / 2) h
   have := Int.ediv_add_emod b 2
   have := Int.emod_lt_of_pos b zero_lt_two
-  revert this; intro this -- FIXME, this should not be needed
+--  revert this; intro this -- FIXME, this should not be needed
   linarith
 
 theorem mod'_eq (a b : ℤ) : mod' a b = a - b * div' a b := by linarith [div'_add_mod' a b]
 
 end Int
 
+example : (1 : ℝ) + 2 = 3 := by norm_num
+
 theorem sq_add_sq_eq_zero {α : Type*} [LinearOrderedRing α] (x y : α) :
     x ^ 2 + y ^ 2 = 0 ↔ x = 0 ∧ y = 0 := by
-  sorry
+--  sorry
+  constructor
+  . simp [pow_two]
+    apply mul_self_add_mul_self_eq_zero.mp
+  . rintro ⟨hx, hy⟩
+    simp [hx, hy]
+
 namespace GaussInt
 
 def norm (x : GaussInt) :=
