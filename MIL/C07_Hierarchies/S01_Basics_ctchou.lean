@@ -36,7 +36,6 @@ class Dia₁ (α : Type) where
 
 infixl:70 " ⋄ "   => Dia₁.dia
 
-
 class Semigroup₁ (α : Type) where
   toDia₁ : Dia₁ α
   /-- Diamond is associative -/
@@ -114,12 +113,17 @@ example {M : Type} [Monoid₁ M] {a b c : M} (hba : b ⋄ a = 𝟙) (hac : a ⋄
 
 
 lemma inv_eq_of_dia [Group₁ G] {a b : G} (h : a ⋄ b = 𝟙) : a⁻¹ = b :=
-  sorry
+--  sorry
+  calc a⁻¹ = a⁻¹ ⋄ (a ⋄ b) := by simp [h, dia_one]
+         _ = (a⁻¹ ⋄ a) ⋄ b := by simp [← dia_assoc]
+         _ = b := by simp [inv_dia, one_dia]
 
-lemma dia_inv [Group₁ G] (a : G) : a ⋄ a⁻¹ = 𝟙 :=
-  sorry
-
-
+lemma dia_inv [Group₁ G] (a : G) : a ⋄ a⁻¹ = 𝟙 := by
+--  sorry
+  have h1 : a⁻¹ ⋄ a = 𝟙 := by apply inv_dia
+  have h2 : (a⁻¹)⁻¹ = a := by apply inv_eq_of_dia h1
+  calc a ⋄ a⁻¹ = (a⁻¹)⁻¹ ⋄ a⁻¹ := by simp [h2]
+             _ = 𝟙 := by simp [inv_dia]
 
 
 class AddSemigroup₃ (α : Type) extends Add α where
