@@ -175,29 +175,46 @@ class Group₃ (G : Type) extends Monoid₃ G, Inv G where
 attribute [simp] Group₃.inv_mul AddGroup₃.neg_add
 
 
-
 @[to_additive]
 lemma inv_eq_of_mul [Group₃ G] {a b : G} (h : a * b = 1) : a⁻¹ = b :=
-  sorry
-
+--  sorry
+  calc a⁻¹ = a⁻¹ * (a * b) := by simp [h, mul_one]
+         _ = (a⁻¹ * a) * b := by simp [← mul_assoc₃]
+         _ = b := by simp [Group₃.inv_mul, one_mul]
 
 @[to_additive (attr := simp)]
 lemma Group₃.mul_inv {G : Type} [Group₃ G] {a : G} : a * a⁻¹ = 1 := by
-  sorry
+--  sorry
+  have h1 := Group₃.inv_mul a
+  have h2 : (a⁻¹)⁻¹ = a := by apply inv_eq_of_mul h1
+  calc a * a⁻¹ = (a⁻¹)⁻¹ * a⁻¹ := by simp [h2]
+             _ = (1 : G) := by simp [Group₃.inv_mul]
 
 @[to_additive]
 lemma mul_left_cancel₃ {G : Type} [Group₃ G] {a b c : G} (h : a * b = a * c) : b = c := by
-  sorry
+--  sorry
+  calc b = a⁻¹ * a * b := by { simp [Group₃.inv_mul] }
+       _ = a⁻¹ * (a * b) := by { rw [mul_assoc₃] }
+       _ = a⁻¹ * (a * c) := by { rw [h] }
+       _ = a⁻¹ * a * c := by { rw [mul_assoc₃] }
+       _ = c := by { simp [Group₃.inv_mul] }
 
 @[to_additive]
-lemma mul_right_cancel₃ {G : Type} [Group₃ G] {a b c : G} (h : b*a = c*a) : b = c := by
-  sorry
+lemma mul_right_cancel₃ {G : Type} [Group₃ G] {a b c : G} (h : b * a = c * a) : b = c := by
+--  sorry
+  calc b = b * (a * a⁻¹) := by { simp [Group₃.mul_inv] }
+       _ = (b * a) * a⁻¹ := by { rw [mul_assoc₃] }
+       _ = (c * a) * a⁻¹ := by { rw [h] }
+       _ = c * (a * a⁻¹) := by { rw [mul_assoc₃] }
+       _ = c := by { simp [Group₃.mul_inv] }
 
 class AddCommGroup₃ (G : Type) extends AddGroup₃ G, AddCommMonoid₃ G
 
 @[to_additive AddCommGroup₃]
 class CommGroup₃ (G : Type) extends Group₃ G, CommMonoid₃ G
 
+#check CommGroup₃.mk
+#print CommGroup₃
 
 
 class Ring₃ (R : Type) extends AddGroup₃ R, Monoid₃ R, MulZeroClass R where
@@ -209,7 +226,20 @@ class Ring₃ (R : Type) extends AddGroup₃ R, Monoid₃ R, MulZeroClass R wher
 instance {R : Type} [Ring₃ R] : AddCommGroup₃ R :=
 { Ring₃.toAddGroup₃ with
   add_comm := by
-    sorry }
+    have lemma1 : ∀ c : R, -1 * c = -c := by
+      intro c
+      calc -1 * c = -1 * c + (1 * c + -c) := by { simp }
+                _ = -1 * c + 1 * c + -c := by { rw [add_assoc₃] }
+                _ = (-1 + 1) * c + -c := by { rw [Ring₃.right_distrib] }
+                _ = -c := by { simp }
+    intro a b
+    calc a + b = a + b + (-(b + a) + (b + a)) := by { simp }
+             _ = a + b + (-1 * (b + a) + (b + a)) := by { rw [lemma1] }
+             _ = a + b + (-1 * b + -1 * a + (b + a)) := by { rw [Ring₃.left_distrib] }
+             _ = a + b + (-b + -a + (b + a)) := by { simp [lemma1] }
+             _ = a + (b + -b) + -a + (b + a) := by { simp only [add_assoc₃] }
+             _ = b + a := by { simp }
+}
 
 instance : Ring₃ ℤ where
   add := (· + ·)
@@ -236,19 +266,36 @@ class LE₁ (α : Type) where
 @[inherit_doc] infix:50 " ≤₁ " => LE₁.le
 
 class Preorder₁ (α : Type)
+  extends LE₁ α where
+  le_refl : ∀ a : α, a ≤₁ a
+  le_trans : ∀ a b c : α, a ≤₁ b → b ≤₁ c → a ≤₁ c
 
 class PartialOrder₁ (α : Type)
+  extends Preorder₁ α where
+  le_antisymm : ∀ a b : α, a ≤₁ b → b ≤₁ a → a = b
 
 class OrderedCommMonoid₁ (α : Type)
+  extends PartialOrder₁ α, CommMonoid₃ α where
+  mul_of_le : ∀ a b : α, a ≤₁ b → ∀ c : α, c * a ≤₁ c * b
 
 instance : OrderedCommMonoid₁ ℕ where
+  le := (· ≤ ·)
+  le_refl := fun _ ↦ le_rfl
+  le_trans := fun _ _ _ ↦ le_trans
+  le_antisymm := fun _ _ ↦ le_antisymm
+  mul := (· * ·)
+  mul_assoc₃ := mul_assoc
+  one := 1
+  one_mul := one_mul
+  mul_one := mul_one
+  mul_comm := mul_comm
+  mul_of_le := fun _ _ h c ↦ Nat.mul_le_mul_left c h
 
 class SMul₃ (α : Type) (β : Type) where
   /-- Scalar multiplication -/
   smul : α → β → β
 
 infixr:73 " • " => SMul₃.smul
-
 
 class Module₁ (R : Type) [Ring₃ R] (M : Type) [AddCommGroup₃ M] extends SMul₃ R M where
   zero_smul : ∀ m : M, (0 : R) • m = 0
