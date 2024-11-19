@@ -88,10 +88,10 @@ def QuotientMonoid.mk [CommMonoid M] (N : Submonoid M) : M → M ⧸ N := Quotie
 instance [CommMonoid M] (N : Submonoid M) : Monoid (M ⧸ N) where
   mul := Quotient.map₂' (· * ·) (by
 --      sorry
-      -- rintro a b ⟨w, wN, z, zN, aw_bz⟩ a' b' ⟨w', w'N, z', z'N, a'w'_b'z'⟩
-      -- unfold Setoid.r ; simp
     rintro a₁ b₁ ⟨w, hw, z, hz, ha⟩ a₂ b₂ ⟨w', hw', z', hz', hb⟩
-    refine ⟨w*w', N.mul_mem hw hw', z*z', N.mul_mem hz hz', ?_⟩
+    simp [Submonoid.Setoid]
+    use w*w' ; simp [N.mul_mem hw hw']
+    use z*z' ; simp [N.mul_mem hz hz']
     rw [mul_comm w, ← mul_assoc, mul_assoc a₁, hb, mul_comm, ← mul_assoc, mul_comm w, ha,
         mul_assoc, mul_comm z, mul_assoc b₂, mul_comm z', mul_assoc]
   )
