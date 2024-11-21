@@ -248,6 +248,8 @@ example {G X : Type*} [Group G] [MulAction G X] : G →* Equiv.Perm X :=
 def CayleyIsoMorphism (G : Type*) [Group G] : G ≃* (toPermHom G G).range :=
   Equiv.Perm.subgroupOfMulAction G G
 
+example {G X : Type*} [Group G] [MulAction G X] : Setoid X := orbitRel G X
+
 example {G X : Type*} [Group G] [MulAction G X] :
     X ≃ (ω : orbitRel.Quotient G X) × (orbit G (Quotient.out' ω)) :=
   MulAction.selfEquivSigmaOrbits G X
@@ -262,14 +264,26 @@ example {G : Type*} [Group G] (H : Subgroup G) : G ≃ (G ⧸ H) × H :=
 variable {G : Type*} [Group G]
 
 lemma conjugate_one (H : Subgroup G) : conjugate 1 H = H := by
-  sorry
+--  sorry
+  ext g
+  simp [conjugate]
 
 instance : MulAction G (Subgroup G) where
   smul := conjugate
   one_smul := by
-    sorry
+--    sorry
+    apply conjugate_one
   mul_smul := by
-    sorry
+--    sorry
+    intro x y H
+    ext g ; constructor
+    . rintro ⟨h, h_H, g_eq⟩
+      use y * h * y⁻¹ ; constructor
+      . use h
+      . rw [g_eq] ; group
+    . rintro ⟨z, ⟨h, h_H, z_eq⟩, g_eq⟩
+      use h
+      simp [h_H, g_eq, z_eq] ; group
 
 end GroupActions
 
@@ -308,7 +322,12 @@ open MonoidHom
 
 lemma aux_card_eq [Finite G] (h' : Nat.card G = Nat.card H * Nat.card K) :
     Nat.card (G ⧸ H) = Nat.card K := by
-  sorry
+--  sorry
+  have h1 : Nat.card G = H.index * Nat.card H := by rw [← Subgroup.index_mul_card H, mul_comm]
+  have h2 : 0 < Nat.card H := by apply Nat.card_pos
+  apply Nat.eq_of_mul_eq_mul_right h2
+  rw [← Subgroup.index_eq_card, ← h1, h', mul_comm]
+
 variable [H.Normal] [K.Normal] [Fintype G] (h : Disjoint H K)
   (h' : Nat.card G = Nat.card H * Nat.card K)
 
@@ -318,10 +337,26 @@ variable [H.Normal] [K.Normal] [Fintype G] (h : Disjoint H K)
 #check ker_restrict
 
 def iso₁ [Fintype G] (h : Disjoint H K) (h' : Nat.card G = Nat.card H * Nat.card K) : K ≃* G ⧸ H := by
-  sorry
+--  sorry
+  apply MulEquiv.ofBijective ((QuotientGroup.mk' H).restrict K)
+  rw [Nat.bijective_iff_injective_and_card]
+  constructor
+  . rw [← ker_eq_bot_iff, (QuotientGroup.mk' H).ker_restrict K]
+    simp [h]
+  . rw [aux_card_eq h']
+
 def iso₂ : G ≃* (G ⧸ K) × (G ⧸ H) := by
-  sorry
+--  sorry
+  apply MulEquiv.ofBijective <| (QuotientGroup.mk' K).prod (QuotientGroup.mk' H)
+  rw [Nat.bijective_iff_injective_and_card]
+  constructor
+  · rw [← ker_eq_bot_iff, ker_prod]
+    simp [h.symm.eq_bot]
+  · rw [Nat.card_prod]
+    rw [aux_card_eq h', aux_card_eq (mul_comm (Nat.card H) _▸ h'), h']
+
 #check MulEquiv.prodCongr
 
 def finalIso : G ≃* H × K :=
-  sorry
+--  sorry
+  (iso₂ h h').trans ((iso₁ h.symm (mul_comm (Nat.card H) _ ▸ h')).prodCongr (iso₁ h h')).symm
