@@ -35,13 +35,19 @@ def preimage {W : Type*} [AddCommGroup W] [Module K W] (φ : V →ₗ[K] W) (H :
     Submodule K V where
   carrier := φ ⁻¹' H
   zero_mem' := by
-    dsimp
-    sorry
+--    dsimp
+--    sorry
+    simp
   add_mem' := by
-    sorry
+    simp
+    intro a b aH bH
+    apply H.add_mem aH bH
   smul_mem' := by
-    dsimp
-    sorry
+    -- dsimp
+    -- sorry
+    simp
+    intro k v vH
+    apply H.smul_mem k vH
 
 example (U : Submodule K V) : Module K U := inferInstance
 
@@ -81,6 +87,11 @@ example {ι : Type*} [DecidableEq ι] (U : ι → Submodule K V) (h : DirectSum.
   (h.submodule_independent.pairwiseDisjoint hij).eq_bot
 
 -- Those conditions characterize direct sums.
+/-
+DirectSum.isInternal_submodule_iff_independent_and_iSup_eq_top.{u, v, u_1} {R : Type u} [Ring R] {ι : Type v}
+  [dec_ι : DecidableEq ι] {M : Type u_1} [AddCommGroup M] [Module R M] (A : ι → Submodule R M) :
+  IsInternal A ↔ CompleteLattice.Independent A ∧ iSup A = ⊤
+-/
 #check DirectSum.isInternal_submodule_iff_independent_and_iSup_eq_top
 
 -- The relation with external direct sums: if a family of subspaces is
@@ -102,7 +113,13 @@ example {S T : Submodule K V} {x : V} (h : x ∈ S ⊔ T) :
   rw [← S.span_eq, ← T.span_eq, ← Submodule.span_union] at h
   induction h using Submodule.span_induction with
   | mem y h =>
-      sorry
+      rw [Set.mem_union] at h
+      rcases h with yS | yT
+      .
+
+
+        sorry
+      . sorry
   | zero =>
       sorry
   | add x y hx hy hx' hy' =>
