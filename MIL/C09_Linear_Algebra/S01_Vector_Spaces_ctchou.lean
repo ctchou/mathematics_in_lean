@@ -85,6 +85,8 @@ example : V × W →ₗ[K] W := LinearMap.snd K V W
 -- Universal property of the product
 example (φ : U →ₗ[K] V) (ψ : U →ₗ[K] W) : U →ₗ[K]  V × W := LinearMap.prod φ ψ
 
+example (φ : U →ₗ[K] V) (ψ : U →ₗ[K] W) : U →ₗ[K]  V × W := φ.prod ψ
+
 -- The product map does the expected thing, first component
 example (φ : U →ₗ[K] V) (ψ : U →ₗ[K] W) : LinearMap.fst K V W ∘ₗ LinearMap.prod φ ψ = φ := rfl
 
