@@ -77,34 +77,80 @@ section
 variable {ι R : Type*} [CommRing R]
 open Ideal Quotient Function
 
+/-
+Pi.ringHom.{u, v, w} {I : Type u} {f : I → Type v} {γ : Type w} [Π (i : I), NonAssocSemiring (f i)] [NonAssocSemiring γ]
+  (g : Π (i : I), γ →+* f i) : γ →+* Π (i : I), f i
+-/
 #check Pi.ringHom
+
+/-
+Ideal.ker_Pi_Quotient_mk.{u, u_1} {R : Type u} [CommRing R] {ι : Type u_1} (I : ι → Ideal R) :
+  RingHom.ker (Pi.ringHom fun i ↦ mk (I i)) = ⨅ i, I i
+-/
 #check ker_Pi_Quotient_mk
+
+/-
+Ideal.Quotient.lift.{u, v} {R : Type u} [CommRing R] {S : Type v} [Semiring S] (I : Ideal R) (f : R →+* S)
+  (H : ∀ a ∈ I, f a = 0) : R ⧸ I →+* S
+-/
+#check Ideal.Quotient.lift
 
 /-- The homomorphism from ``R ⧸ ⨅ i, I i`` to ``Π i, R ⧸ I i`` featured in the Chinese
   Remainder Theorem. -/
 def chineseMap (I : ι → Ideal R) : (R ⧸ ⨅ i, I i) →+* Π i, R ⧸ I i :=
-  sorry
+--  sorry
+  Ideal.Quotient.lift (⨅ i, I i) (Pi.ringHom fun i : ι ↦ Ideal.Quotient.mk (I i))
+    (by simp [← RingHom.mem_ker, ker_Pi_Quotient_mk])
 
 lemma chineseMap_mk (I : ι → Ideal R) (x : R) :
     chineseMap I (Quotient.mk _ x) = fun i : ι ↦ Ideal.Quotient.mk (I i) x :=
-  sorry
+--  sorry
+  rfl
 
 lemma chineseMap_mk' (I : ι → Ideal R) (x : R) (i : ι) :
     chineseMap I (mk _ x) i = mk (I i) x :=
-  sorry
+--  sorry
+  rfl
 
+/-
+Ideal.injective_lift_iff.{u, v} {R : Type u} {S : Type v} [CommRing R] [Semiring S] {I : Ideal R} {f : R →+* S}
+  (H : ∀ a ∈ I, f a = 0) : Injective ⇑(lift I f H) ↔ RingHom.ker f = I
+-/
 #check injective_lift_iff
 
 lemma chineseMap_inj (I : ι → Ideal R) : Injective (chineseMap I) := by
-  sorry
+--  sorry
+  rw [chineseMap, injective_lift_iff, ker_Pi_Quotient_mk]
 
+/-
+IsCoprime.{u} {R : Type u} [CommSemiring R] (x y : R) : Prop
+-/
 #check IsCoprime
+/-
+Ideal.isCoprime_iff_add.{u} {R : Type u} [CommSemiring R] {I J : Ideal R} : IsCoprime I J ↔ I + J = 1
+-/
 #check isCoprime_iff_add
+/-
+Ideal.isCoprime_iff_exists.{u} {R : Type u} [CommSemiring R] {I J : Ideal R} :
+  IsCoprime I J ↔ ∃ i ∈ I, ∃ j ∈ J, i + j = 1
+-/
 #check isCoprime_iff_exists
+/-
+Ideal.isCoprime_iff_sup_eq.{u} {R : Type u} [CommSemiring R] {I J : Ideal R} : IsCoprime I J ↔ I ⊔ J = ⊤
+-/
 #check isCoprime_iff_sup_eq
+/-
+Ideal.isCoprime_iff_codisjoint.{u} {R : Type u} [CommSemiring R] {I J : Ideal R} : IsCoprime I J ↔ Codisjoint I J
+-/
 #check isCoprime_iff_codisjoint
 
+/-
+Finset.mem_insert_of_mem.{u_1} {α : Type u_1} [DecidableEq α] {s : Finset α} {a b : α} (h : a ∈ s) : a ∈ insert b s
+-/
 #check Finset.mem_insert_of_mem
+/-
+Finset.mem_insert_self.{u_1} {α : Type u_1} [DecidableEq α] (a : α) (s : Finset α) : a ∈ insert a s
+-/
 #check Finset.mem_insert_self
 
 theorem isCoprime_Inf {I : Ideal R} {J : ι → Ideal R} {s : Finset ι}
@@ -118,10 +164,10 @@ theorem isCoprime_Inf {I : Ideal R} {J : ι → Ideal R} {s : Finset ι}
       rw [Finset.iInf_insert, inf_comm, one_eq_top, eq_top_iff, ← one_eq_top]
       set K := ⨅ j ∈ s, J j
       calc
-        1 = I + K                  := sorry
-        _ = I + K * (I + J i)      := sorry
-        _ = (1 + K) * I + K * J i  := sorry
-        _ ≤ I + K ⊓ J i            := sorry
+        1 = I + K                  := (hs fun j hj ↦ hf j (Finset.mem_insert_of_mem hj)).symm
+        _ = I + K * (I + J i)      := by { rw [hf i (Finset.mem_insert_self i s), mul_one] }
+        _ = (1 + K) * I + K * J i  := by { ring }
+        _ ≤ I + K ⊓ J i            := by { gcongr ; apply mul_le_left ; apply mul_le_inf }
 lemma chineseMap_surj [Fintype ι] {I : ι → Ideal R}
     (hI : ∀ i j, i ≠ j → IsCoprime (I i) (I j)) : Surjective (chineseMap I) := by
   classical
@@ -130,11 +176,23 @@ lemma chineseMap_surj [Fintype ι] {I : ι → Ideal R}
   have key : ∀ i, ∃ e : R, mk (I i) e = 1 ∧ ∀ j, j ≠ i → mk (I j) e = 0 := by
     intro i
     have hI' : ∀ j ∈ ({i} : Finset ι)ᶜ, IsCoprime (I i) (I j) := by
-      sorry
-    sorry
+--      sorry
+      intros j hj
+      exact hI _ _ (by simpa [ne_comm, isCoprime_iff_add] using hj)
+--    sorry
+    rcases isCoprime_iff_exists.mp (isCoprime_Inf hI') with ⟨u, hu, e, he, hue⟩
+    replace he : ∀ j, j ≠ i → e ∈ I j := by simpa using he
+    refine ⟨e, ?_, ?_⟩
+    · simp [eq_sub_of_add_eq' hue, map_sub, eq_zero_iff_mem.mpr hu]
+    · exact fun j hj ↦ eq_zero_iff_mem.mpr (he j hj)
   choose e he using key
   use mk _ (∑ i, f i * e i)
-  sorry
+--  sorry
+  ext i
+  rw [chineseMap_mk', map_sum, Fintype.sum_eq_single i]
+  · simp [(he i).1, hf]
+  · intros j hj
+    simp [(he j).2 i hj.symm]
 
 noncomputable def chineseIso [Fintype ι] (f : ι → Ideal R)
     (hf : ∀ i j, i ≠ j → IsCoprime (f i) (f j)) : (R ⧸ ⨅ i, f i) ≃+* Π i, R ⧸ f i :=
