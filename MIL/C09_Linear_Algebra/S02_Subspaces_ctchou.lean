@@ -113,19 +113,28 @@ example {S T : Submodule K V} {x : V} (h : x ∈ S ⊔ T) :
   rw [← S.span_eq, ← T.span_eq, ← Submodule.span_union] at h
   induction h using Submodule.span_induction with
   | mem y h =>
-      rw [Set.mem_union] at h
-      rcases h with yS | yT
-      .
-
-
-        sorry
-      . sorry
+--      sorry
+      rcases h with y_S | y_T
+      . use y ; simp ; apply y_S
+      . use 0 ; simp ; apply y_T
   | zero =>
-      sorry
+--      sorry
+      use 0 ; simp
   | add x y hx hy hx' hy' =>
-      sorry
+--      sorry
+      rcases hx' with ⟨xs, xs_S, xt, xt_T, x_eq⟩
+      rcases hy' with ⟨ys, ys_S, yt, yt_T, y_eq⟩
+      have xy_S := S.add_mem xs_S ys_S
+      have xy_T := T.add_mem xt_T yt_T
+      use (xs + ys), xy_S, (xt + yt), xy_T
+      rw [x_eq, y_eq] ; module
   | smul a x hx hx' =>
-      sorry
+--      sorry
+      rcases hx' with ⟨xs, xs_S, xt, xt_T, x_eq⟩
+      have a_xs_S := S.smul_mem a xs_S
+      have a_xt_T := T.smul_mem a xt_T
+      use (a • xs), a_xs_S, (a • xt), a_xt_T
+      rw [x_eq] ; module
 
 section
 
