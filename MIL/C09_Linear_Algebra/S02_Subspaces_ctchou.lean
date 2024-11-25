@@ -158,13 +158,37 @@ example : Injective φ ↔ ker φ = ⊥ := ker_eq_bot.symm
 
 example : Surjective φ ↔ range φ = ⊤ := range_eq_top.symm
 
+/-
+Submodule.mem_map_of_mem.{u_1, u_3, u_5, u_7, u_9} {R : Type u_1} {R₂ : Type u_3} {M : Type u_5} {M₂ : Type u_7}
+  [Semiring R] [Semiring R₂] [AddCommMonoid M] [AddCommMonoid M₂] [Module R M] [Module R₂ M₂] {σ₁₂ : R →+* R₂}
+  [RingHomSurjective σ₁₂] {F : Type u_9} [FunLike F M M₂] [SemilinearMapClass F σ₁₂ M M₂] {f : F} {p : Submodule R M}
+  {r : M} (h : r ∈ p) : f r ∈ Submodule.map f p
+-/
 #check Submodule.mem_map_of_mem
+/-
+Submodule.mem_map.{u_1, u_3, u_5, u_7, u_9} {R : Type u_1} {R₂ : Type u_3} {M : Type u_5} {M₂ : Type u_7} [Semiring R]
+  [Semiring R₂] [AddCommMonoid M] [AddCommMonoid M₂] [Module R M] [Module R₂ M₂] {σ₁₂ : R →+* R₂}
+  [RingHomSurjective σ₁₂] {F : Type u_9} [FunLike F M M₂] [SemilinearMapClass F σ₁₂ M M₂] {f : F} {p : Submodule R M}
+  {x : M₂} : x ∈ Submodule.map f p ↔ ∃ y ∈ p, f y = x
+-/
 #check Submodule.mem_map
+/-
+Submodule.mem_comap.{u_1, u_3, u_5, u_7, u_9} {R : Type u_1} {R₂ : Type u_3} {M : Type u_5} {M₂ : Type u_7} [Semiring R]
+  [Semiring R₂] [AddCommMonoid M] [AddCommMonoid M₂] [Module R M] [Module R₂ M₂] {σ₁₂ : R →+* R₂} {x : M} {F : Type u_9}
+  [FunLike F M M₂] [SemilinearMapClass F σ₁₂ M M₂] {f : F} {p : Submodule R₂ M₂} : x ∈ Submodule.comap f p ↔ f x ∈ p
+-/
 #check Submodule.mem_comap
 
 example (E : Submodule K V) (F : Submodule K W) :
     Submodule.map φ E ≤ F ↔ E ≤ Submodule.comap φ F := by
-  sorry
+--  sorry
+  constructor
+  . intro h v v_E
+    simp
+    apply h ⟨v, v_E, rfl⟩
+  . intro h w ⟨v, v_E, eq_w⟩
+    rw [← eq_w]
+    apply h v_E
 
 variable (E : Submodule K V)
 
@@ -185,11 +209,37 @@ noncomputable example : (V ⧸ LinearMap.ker φ) ≃ₗ[K] range φ := φ.quotKe
 
 open Submodule
 
+/-
+Submodule.map_comap_eq.{u_1, u_2, u_5, u_6, u_10} {R : Type u_1} {R₂ : Type u_2} {M : Type u_5} {M₂ : Type u_6}
+  [Semiring R] [Semiring R₂] [AddCommMonoid M] [AddCommMonoid M₂] [Module R M] [Module R₂ M₂] {τ₁₂ : R →+* R₂}
+  {F : Type u_10} [FunLike F M M₂] [SemilinearMapClass F τ₁₂ M M₂] [RingHomSurjective τ₁₂] (f : F)
+  (q : Submodule R₂ M₂) : map f (comap f q) = range f ⊓ q
+-/
 #check Submodule.map_comap_eq
+/-
+Submodule.comap_map_eq.{u_1, u_2, u_4, u_5, u_8} {R : Type u_1} {R₂ : Type u_2} {M : Type u_4} {M₂ : Type u_5}
+  [Semiring R] [Semiring R₂] [AddCommGroup M] [Module R M] [AddCommGroup M₂] [Module R₂ M₂] {τ₁₂ : R →+* R₂}
+  [RingHomSurjective τ₁₂] {F : Type u_8} [FunLike F M M₂] [SemilinearMapClass F τ₁₂ M M₂] (f : F) (p : Submodule R M) :
+  comap f (map f p) = p ⊔ ker f
+-/
 #check Submodule.comap_map_eq
 
 example : Submodule K (V ⧸ E) ≃ { F : Submodule K V // E ≤ F } where
-  toFun := sorry
-  invFun := sorry
-  left_inv := sorry
-  right_inv := sorry
+--  sorry
+  toFun := (fun F => ⟨comap E.mkQ F, by
+    conv_lhs => rw [← E.ker_mkQ, ← comap_bot]
+    gcongr
+    apply bot_le⟩
+  )
+  invFun := (fun P => map E.mkQ P)
+  left_inv := (fun P => by
+    dsimp
+    rw [Submodule.map_comap_eq, E.range_mkQ]
+    exact top_inf_eq P
+  )
+  right_inv := by
+    intro P
+    ext x
+    dsimp only
+    rw [Submodule.comap_map_eq, E.ker_mkQ, sup_of_le_left]
+    exact P.2
