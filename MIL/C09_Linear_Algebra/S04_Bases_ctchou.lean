@@ -55,6 +55,7 @@ variable (a b c d : ℝ) in
 
 
 #norm_num [Matrix.inv_def] !![(1 : ℝ), 2; 3, 4]⁻¹ -- !![-2, 1; 3 / 2, -(1 / 2)]
+#norm_num [Matrix.inv_def] !![(1 : ℝ), 2; 3, 6]⁻¹ -- 0
 
 
 example : !![(1 : ℝ), 2; 3, 4]⁻¹ * !![(1 : ℝ), 2; 3, 4] = 1 := by
@@ -83,8 +84,21 @@ example : !![1, 1; 1, 1] * !![1, 1; 1, 1] = !![2, 2; 2, 2] := by
 example {n : ℕ} (v : Fin n → ℝ) :
     Matrix.vandermonde v = Matrix.of (fun i j : Fin n ↦ v i ^ (j : ℕ)) :=
   rfl
+
+example {n : ℕ} (v : Fin n → ℝ) :
+    Matrix.vandermonde v = Matrix.of (fun i j : Fin n => v i ^ (j : ℕ)) :=
+  rfl
+
+variable {n : ℕ} (v : Fin n → ℝ)
+#check (fun i j : Fin n ↦ v i ^ (j : ℕ))
+#check (fun i j : Fin n => v i ^ (j : ℕ))
+#check (fun _ ↦ 1 : Fin 2 → Fin 2 → ℤ)
+#check (fun _ => 1 : Fin 2 → Fin 2 → ℤ)
+
 end
+
 end matrices
+
 variable {K : Type*} [Field K] {V : Type*} [AddCommGroup V] [Module K V]
 
 section
@@ -112,6 +126,7 @@ example (b : ι → V) (b_indep : LinearIndependent K b)
     (b_spans : ∀ v, v ∈ Submodule.span K (Set.range b)) (i : ι) :
     Basis.mk b_indep (fun v _ ↦ b_spans v) i = b i :=
   Basis.mk_apply b_indep (fun v _ ↦ b_spans v) i
+
 
 variable [DecidableEq ι]
 
@@ -181,13 +196,41 @@ end
 open Module LinearMap Matrix
 
 -- Some lemmas coming from the fact that `LinearMap.toMatrix` is an algebra morphism.
+/-
+LinearMap.toMatrix_comp.{u_1, u_2, u_3, u_4, u_5, u_6, u_7} {R : Type u_1} [CommSemiring R] {l : Type u_2}
+  {m : Type u_3} {n : Type u_4} [Fintype n] [Fintype m] [DecidableEq n] {M₁ : Type u_5} {M₂ : Type u_6}
+  [AddCommMonoid M₁] [AddCommMonoid M₂] [Module R M₁] [Module R M₂] (v₁ : Basis n R M₁) (v₂ : Basis m R M₂)
+  {M₃ : Type u_7} [AddCommMonoid M₃] [Module R M₃] (v₃ : Basis l R M₃) [Finite l] [DecidableEq m] (f : M₂ →ₗ[R] M₃)
+  (g : M₁ →ₗ[R] M₂) : (toMatrix v₁ v₃) (f ∘ₗ g) = (toMatrix v₂ v₃) f * (toMatrix v₁ v₂) g
+-/
 #check toMatrix_comp
+/-
+LinearMap.id_comp.{u_3, u_4, u_10, u_11} {R₂ : Type u_3} {R₃ : Type u_4} {M₂ : Type u_10} {M₃ : Type u_11} [Semiring R₂]
+  [Semiring R₃] [AddCommMonoid M₂] [AddCommMonoid M₃] {module_M₂ : Module R₂ M₂} {module_M₃ : Module R₃ M₃}
+  {σ₂₃ : R₂ →+* R₃} (f : M₂ →ₛₗ[σ₂₃] M₃) : LinearMap.id.comp f = f
+-/
 #check id_comp
+/-
+LinearMap.comp_id.{u_3, u_4, u_10, u_11} {R₂ : Type u_3} {R₃ : Type u_4} {M₂ : Type u_10} {M₃ : Type u_11} [Semiring R₂]
+  [Semiring R₃] [AddCommMonoid M₂] [AddCommMonoid M₃] {module_M₂ : Module R₂ M₂} {module_M₃ : Module R₃ M₃}
+  {σ₂₃ : R₂ →+* R₃} (f : M₂ →ₛₗ[σ₂₃] M₃) : f.comp LinearMap.id = f
+-/
 #check comp_id
+/-
+LinearMap.toMatrix_id.{u_1, u_4, u_5} {R : Type u_1} [CommSemiring R] {n : Type u_4} [Fintype n] [DecidableEq n]
+  {M₁ : Type u_5} [AddCommMonoid M₁] [Module R M₁] (v₁ : Basis n R M₁) : (toMatrix v₁ v₁) LinearMap.id = 1
+-/
 #check toMatrix_id
 
 -- Some lemmas coming from the fact that ``Matrix.det`` is a multiplicative monoid morphism.
+/-
+Matrix.det_mul.{v, u_2} {n : Type u_2} [DecidableEq n] [Fintype n] {R : Type v} [CommRing R] (M N : Matrix n n R) :
+  (M * N).det = M.det * N.det
+-/
 #check Matrix.det_mul
+/-
+Matrix.det_one.{v, u_2} {n : Type u_2} [DecidableEq n] [Fintype n] {R : Type v} [CommRing R] : det 1 = 1
+-/
 #check Matrix.det_one
 
 example [Fintype ι] (B' : Basis ι K V) (φ : End K V) :
@@ -196,7 +239,10 @@ example [Fintype ι] (B' : Basis ι K V) (φ : End K V) :
   set M' := toMatrix B' B' φ
   set P := (toMatrix B B') LinearMap.id
   set P' := (toMatrix B' B) LinearMap.id
-  sorry
+--  sorry
+  have basis_change : M = P' * M' * P := by rw [← toMatrix_comp, ← toMatrix_comp, id_comp, comp_id]
+  rw [basis_change, det_mul, det_mul, mul_comm, ← mul_assoc, ← det_mul, ← toMatrix_comp, comp_id, toMatrix_id, det_one, one_mul]
+
 end
 
 section
@@ -241,9 +287,17 @@ example : finrank K (E ⊔ F : Submodule K V) + finrank K (E ⊓ F : Submodule K
   Submodule.finrank_sup_add_finrank_inf_eq E F
 
 example : finrank K E ≤ finrank K V := Submodule.finrank_le E
+
 example (h : finrank K V < finrank K E + finrank K F) :
     Nontrivial (E ⊓ F : Submodule K V) := by
-  sorry
+--  sorry
+  rw [← Module.finrank_pos_iff (R := K)]
+  have h0 := Submodule.finrank_sup_add_finrank_inf_eq E F
+  have h1 := Submodule.finrank_le E
+  have h2 := Submodule.finrank_le F
+  have h3 := Submodule.finrank_le (E ⊔ F)
+  linarith
+
 end
 
 #check V -- Type u_2
