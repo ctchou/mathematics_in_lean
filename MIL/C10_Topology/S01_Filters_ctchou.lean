@@ -5,16 +5,38 @@ open Set Filter Topology
 
 def principal {α : Type*} (s : Set α) : Filter α
     where
+-- sorry
   sets := { t | s ⊆ t }
-  univ_sets := sorry
-  sets_of_superset := sorry
-  inter_sets := sorry
+  univ_sets := by { simp }
+  sets_of_superset := by { simp ; apply subset_trans }
+  inter_sets := by { simp ; intros ; constructor <;> assumption }
 
 example : Filter ℕ :=
   { sets := { s | ∃ a, ∀ b, a ≤ b → b ∈ s }
-    univ_sets := sorry
-    sets_of_superset := sorry
-    inter_sets := sorry }
+-- sorry
+    univ_sets := by simp
+    sets_of_superset := by
+      simp
+      intros s t a hs hst
+      use a
+      intro b hab
+      exact hbs (hs b hab)
+    inter_sets := by
+      simp
+      intro s1 s2 a1 hs1 a2 hs2
+      use (max a1 a2)
+      intro b hb
+      rw [max_le_iff] at hb
+      rcases hb with ⟨hb1, hb2⟩
+      have := hs1 b hb1
+      have := hs2 b hb2
+      tauto
+  }
+
+/-
+Filter.Tendsto.{u_1, u_2} {α : Type u_1} {β : Type u_2} (f : α → β) (l₁ : Filter α) (l₂ : Filter β) : Prop
+-/
+#check Tendsto
 
 def Tendsto₁ {X Y : Type*} (f : X → Y) (F : Filter X) (G : Filter Y) :=
   ∀ V ∈ G, f ⁻¹' V ∈ F
@@ -33,8 +55,13 @@ example {X Y : Type*} (f : X → Y) (F : Filter X) (G : Filter Y) :
     ∀ {α β γ} {f : Filter α} {m : α → β} {m' : β → γ}, map m' (map m f) = map (m' ∘ m) f)
 
 example {X Y Z : Type*} {F : Filter X} {G : Filter Y} {H : Filter Z} {f : X → Y} {g : Y → Z}
-    (hf : Tendsto₁ f F G) (hg : Tendsto₁ g G H) : Tendsto₁ (g ∘ f) F H :=
-  sorry
+    (hf : Tendsto₁ f F G) (hg : Tendsto₁ g G H) : Tendsto₁ (g ∘ f) F H := by
+--  sorry
+  intro z zH
+  rw [preimage_comp]
+  apply hf
+  apply hg
+  assumption
 
 variable (f : ℝ → ℝ) (x₀ y₀ : ℝ)
 
@@ -102,4 +129,3 @@ example (P Q R : ℕ → Prop) (hP : ∀ᶠ n in atTop, P n) (hQ : ∀ᶠ n in a
 example (u : ℕ → ℝ) (M : Set ℝ) (x : ℝ) (hux : Tendsto u atTop (𝓝 x))
     (huM : ∀ᶠ n in atTop, u n ∈ M) : x ∈ closure M :=
   sorry
-
