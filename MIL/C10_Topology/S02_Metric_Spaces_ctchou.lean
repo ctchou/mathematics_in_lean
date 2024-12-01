@@ -49,7 +49,16 @@ example {X Y : Type*} [MetricSpace X] [MetricSpace Y] {f : X → Y} (hf : Contin
   hf.fst'.dist hf.snd'
 
 example {f : ℝ → X} (hf : Continuous f) : Continuous fun x : ℝ ↦ f (x ^ 2 + x) := by
-  sorry
+--  sorry
+  continuity
+
+example {f : ℝ → X} (hf : Continuous f) : Continuous fun x : ℝ ↦ f (x ^ 2 + x) := by
+--  sorry
+  apply Continuous.comp hf
+  apply Continuous.add
+  . apply Continuous.pow
+    apply continuous_id
+  . apply continuous_id
 
 example {X Y : Type*} [MetricSpace X] [MetricSpace Y] (f : X → Y) (a : X) :
     ContinuousAt f a ↔ ∀ ε > 0, ∃ δ > 0, ∀ {x}, dist x a < δ → dist (f x) (f a) < ε :=
@@ -86,9 +95,17 @@ example {s : Set X} (hs : IsClosed s) {u : ℕ → X} (hu : Tendsto u atTop (�
 example {s : Set X} : a ∈ closure s ↔ ∀ ε > 0, ∃ b ∈ s, a ∈ Metric.ball b ε :=
   Metric.mem_closure_iff
 
+#check mem_of_tendsto
+
 example {u : ℕ → X} (hu : Tendsto u atTop (𝓝 a)) {s : Set X} (hs : ∀ n, u n ∈ s) :
-    a ∈ closure s :=
-  sorry
+    a ∈ closure s := by
+--  sorry
+  have hc : IsClosed (closure s) := by exact isClosed_closure
+  have hsc : ∀ n, u n ∈ closure s := by
+    intro n
+    apply subset_closure (hs n)
+  apply hc.mem_of_tendsto hu
+  exact Eventually.of_forall hsc (f := atTop)
 
 example {x : X} {s : Set X} : s ∈ 𝓝 x ↔ ∃ ε > 0, Metric.ball x ε ⊆ s :=
   Metric.nhds_basis_ball.mem_iff
