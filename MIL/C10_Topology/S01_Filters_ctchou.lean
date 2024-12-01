@@ -20,7 +20,7 @@ example : Filter ℕ :=
       intros s t a hs hst
       use a
       intro b hab
-      exact hbs (hs b hab)
+      exact hst (hs b hab)
     inter_sets := by
       simp
       intro s1 s2 a1 hs1 a2 hs2
@@ -79,20 +79,39 @@ end
 example : 𝓝 (x₀, y₀) = 𝓝 x₀ ×ˢ 𝓝 y₀ :=
   nhds_prod_eq
 
+/-
+le_inf_iff.{u} {α : Type u} [SemilatticeInf α] {a b c : α} : a ≤ b ⊓ c ↔ a ≤ b ∧ a ≤ c
+-/
 #check le_inf_iff
 
 example (f : ℕ → ℝ × ℝ) (x₀ y₀ : ℝ) :
     Tendsto f atTop (𝓝 (x₀, y₀)) ↔
-      Tendsto (Prod.fst ∘ f) atTop (𝓝 x₀) ∧ Tendsto (Prod.snd ∘ f) atTop (𝓝 y₀) :=
-  sorry
+      Tendsto (Prod.fst ∘ f) atTop (𝓝 x₀) ∧ Tendsto (Prod.snd ∘ f) atTop (𝓝 y₀) := by
+--  sorry
+  simp [Tendsto, nhds_prod_eq, Filter.le_prod]
 
 example (x₀ : ℝ) : HasBasis (𝓝 x₀) (fun ε : ℝ ↦ 0 < ε) fun ε ↦ Ioo (x₀ - ε) (x₀ + ε) :=
   nhds_basis_Ioo_pos x₀
+
+/-
+Filter.HasBasis.tendsto_iff.{u_1, u_2, u_4, u_5} {α : Type u_1} {β : Type u_2} {ι : Sort u_4} {ι' : Sort u_5}
+  {la : Filter α} {pa : ι → Prop} {sa : ι → Set α} {lb : Filter β} {pb : ι' → Prop} {sb : ι' → Set β} {f : α → β}
+  (hla : la.HasBasis pa sa) (hlb : lb.HasBasis pb sb) :
+  Tendsto f la lb ↔ ∀ (ib : ι'), pb ib → ∃ ia, pa ia ∧ ∀ x ∈ sa ia, f x ∈ sb ib
+-/
+#check Filter.HasBasis.tendsto_iff
 
 example (u : ℕ → ℝ) (x₀ : ℝ) :
     Tendsto u atTop (𝓝 x₀) ↔ ∀ ε > 0, ∃ N, ∀ n ≥ N, u n ∈ Ioo (x₀ - ε) (x₀ + ε) := by
   have : atTop.HasBasis (fun _ : ℕ ↦ True) Ici := atTop_basis
   rw [this.tendsto_iff (nhds_basis_Ioo_pos x₀)]
+  simp
+
+example (u : ℕ → ℝ) (x₀ : ℝ) :
+    Tendsto u atTop (𝓝 x₀) ↔ ∀ ε > 0, ∃ N, ∀ n ≥ N, u n ∈ Ioo (x₀ - ε) (x₀ + ε) := by
+  have h1 : atTop.HasBasis (fun _ : ℕ ↦ True) Ici := atTop_basis
+  have h2 := h1.tendsto_iff (nhds_basis_Ioo_pos x₀) (f := u)
+  rw [h2]
   simp
 
 example (P Q : ℕ → Prop) (hP : ∀ᶠ n in atTop, P n) (hQ : ∀ᶠ n in atTop, Q n) :
@@ -107,8 +126,19 @@ example (u v : ℕ → ℝ) (h : u =ᶠ[atTop] v) (x₀ : ℝ) :
     Tendsto u atTop (𝓝 x₀) ↔ Tendsto v atTop (𝓝 x₀) :=
   tendsto_congr' h
 
+/-
+Filter.Eventually.of_forall.{u} {α : Type u} {p : α → Prop} {f : Filter α} (hp : ∀ (x : α), p x) : ∀ᶠ (x : α) in f, p x
+-/
 #check Eventually.of_forall
+/-
+Filter.Eventually.mono.{u} {α : Type u} {p q : α → Prop} {f : Filter α} (hp : ∀ᶠ (x : α) in f, p x)
+  (hq : ∀ (x : α), p x → q x) : ∀ᶠ (x : α) in f, q x
+-/
 #check Eventually.mono
+/-
+Filter.Eventually.and.{u} {α : Type u} {p q : α → Prop} {f : Filter α} :
+  Filter.Eventually p f → Filter.Eventually q f → ∀ᶠ (x : α) in f, p x ∧ q x
+-/
 #check Eventually.and
 
 example (P Q R : ℕ → Prop) (hP : ∀ᶠ n in atTop, P n) (hQ : ∀ᶠ n in atTop, Q n)
@@ -122,10 +152,28 @@ example (P Q R : ℕ → Prop) (hP : ∀ᶠ n in atTop, P n) (hQ : ∀ᶠ n in a
   filter_upwards [hP, hQ, hR] with n h h' h''
   exact h'' ⟨h, h'⟩
 
+/-
+mem_closure_iff_clusterPt.{u} {X : Type u} {x : X} {s : Set X} [TopologicalSpace X] : x ∈ closure s ↔ ClusterPt x (𝓟 s)
+-/
 #check mem_closure_iff_clusterPt
+/-
+Filter.le_principal_iff.{u} {α : Type u} {s : Set α} {f : Filter α} : f ≤ 𝓟 s ↔ s ∈ f
+-/
 #check le_principal_iff
+/-
+Filter.neBot_of_le.{u} {α : Type u} {f g : Filter α} [hf : f.NeBot] (hg : f ≤ g) : g.NeBot
+-/
 #check neBot_of_le
 
 example (u : ℕ → ℝ) (M : Set ℝ) (x : ℝ) (hux : Tendsto u atTop (𝓝 x))
-    (huM : ∀ᶠ n in atTop, u n ∈ M) : x ∈ closure M :=
-  sorry
+    (huM : ∀ᶠ n in atTop, u n ∈ M) : x ∈ closure M := by
+--  sorry
+  rw [mem_closure_iff_clusterPt, ClusterPt]
+  rw [Tendsto] at hux
+  have huM : map u atTop ≤ 𝓟 M := by
+    rw [le_principal_iff]
+    apply huM
+  have huxM : map u atTop ≤ 𝓝 x ⊓ 𝓟 M := by
+    rw [le_inf_iff]
+    tauto
+  apply neBot_of_le huxM
