@@ -2,8 +2,9 @@ import MIL.Common
 import Mathlib.Topology.Instances.Real
 import Mathlib.Analysis.Normed.Operator.BanachSteinhaus
 
-open Set Filter
-open Topology Filter
+open Set
+open Filter
+open Topology
 
 variable {X : Type*} [MetricSpace X] (a b c : X)
 
@@ -33,6 +34,10 @@ example {X Y : Type*} [MetricSpace X] [MetricSpace Y] {f : X → Y} (hf : Contin
 example {X Y : Type*} [MetricSpace X] [MetricSpace Y] {f : X → Y} (hf : Continuous f) :
     Continuous fun p : X × X ↦ dist (f p.1) (f p.2) :=
   continuous_dist.comp ((hf.comp continuous_fst).prod_mk (hf.comp continuous_snd))
+
+example {X Y : Type*} [MetricSpace X] [MetricSpace Y] {f : X → Y} (hf : Continuous f) :
+    Continuous fun p : X × X ↦ dist (f p.1) (f p.2) :=
+  Continuous.comp continuous_dist ((hf.comp continuous_fst).prod_mk (hf.comp continuous_snd))
 
 example {X Y : Type*} [MetricSpace X] [MetricSpace Y] {f : X → Y} (hf : Continuous f) :
     Continuous fun p : X × X ↦ dist (f p.1) (f p.2) := by
@@ -95,8 +100,6 @@ example {s : Set X} (hs : IsClosed s) {u : ℕ → X} (hu : Tendsto u atTop (�
 example {s : Set X} : a ∈ closure s ↔ ∀ ε > 0, ∃ b ∈ s, a ∈ Metric.ball b ε :=
   Metric.mem_closure_iff
 
-#check mem_of_tendsto
-
 example {u : ℕ → X} (hu : Tendsto u atTop (𝓝 a)) {s : Set X} (hs : ∀ n, u n ∈ s) :
     a ∈ closure s := by
 --  sorry
@@ -107,11 +110,31 @@ example {u : ℕ → X} (hu : Tendsto u atTop (𝓝 a)) {s : Set X} (hs : ∀ n,
   apply hc.mem_of_tendsto hu
   exact Eventually.of_forall hsc (f := atTop)
 
+/-
+Metric.nhds_basis_ball.{u} {α : Type u} [PseudoMetricSpace α] {x : α} : (𝓝 x).HasBasis (fun x ↦ 0 < x) (Metric.ball x)
+-/
+#check Metric.nhds_basis_ball
+/-
+Filter.HasBasis.mem_iff.{u_1, u_4} {α : Type u_1} {ι : Sort u_4} {l : Filter α} {p : ι → Prop} {s : ι → Set α}
+  {t : Set α} (hl : l.HasBasis p s) : t ∈ l ↔ ∃ i, p i ∧ s i ⊆ t
+-/
+#check HasBasis.mem_iff
+
 example {x : X} {s : Set X} : s ∈ 𝓝 x ↔ ∃ ε > 0, Metric.ball x ε ⊆ s :=
   Metric.nhds_basis_ball.mem_iff
 
 example {x : X} {s : Set X} : s ∈ 𝓝 x ↔ ∃ ε > 0, Metric.closedBall x ε ⊆ s :=
   Metric.nhds_basis_closedBall.mem_iff
+
+/-
+IsCompact.{u_1} {X : Type u_1} [TopologicalSpace X] (s : Set X) : Prop
+-/
+#check IsCompact
+/-
+CompactIccSpace.isCompact_Icc.{u_1} {α : Type u_1} :
+  ∀ {inst : TopologicalSpace α} {inst_1 : Preorder α} [self : CompactIccSpace α] {a b : α}, IsCompact (Icc a b)
+-/
+#check isCompact_Icc
 
 example : IsCompact (Set.Icc 0 1 : Set ℝ) :=
   isCompact_Icc
@@ -136,6 +159,9 @@ example {s : Set X} (hs : IsCompact s) : IsClosed s :=
 example {X : Type*} [MetricSpace X] [CompactSpace X] : IsCompact (univ : Set X) :=
   isCompact_univ
 
+/-
+IsCompact.isClosed.{u_1} {X : Type u_1} [TopologicalSpace X] [T2Space X] {s : Set X} (hs : IsCompact s) : IsClosed s
+-/
 #check IsCompact.isClosed
 
 example {X : Type*} [MetricSpace X] {Y : Type*} [MetricSpace Y] {f : X → Y} :
