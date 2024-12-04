@@ -250,11 +250,30 @@ open BigOperators
 
 open Finset
 
+/-
+tendsto_pow_atTop_nhds_zero_of_lt_one.{u_4} {𝕜 : Type u_4} [LinearOrderedField 𝕜] [Archimedean 𝕜] [TopologicalSpace 𝕜]
+  [OrderTopology 𝕜] {r : 𝕜} (h₁ : 0 ≤ r) (h₂ : r < 1) : Tendsto (fun n ↦ r ^ n) atTop (𝓝 0)
+-/
+#check tendsto_pow_atTop_nhds_zero_of_lt_one
+/-
+Filter.Tendsto.mul.{u_2, u_3} {α : Type u_2} {M : Type u_3} [TopologicalSpace M] [Mul M] [ContinuousMul M] {f g : α → M}
+  {x : Filter α} {a b : M} (hf : Tendsto f x (𝓝 a)) (hg : Tendsto g x (𝓝 b)) : Tendsto (fun x ↦ f x * g x) x (𝓝 (a * b))
+-/
+#check Tendsto.mul
+/-
+dist_le_range_sum_dist.{u} {α : Type u} [PseudoMetricSpace α] (f : ℕ → α) (n : ℕ) :
+  dist (f 0) (f n) ≤ ∑ i ∈ Finset.range n, dist (f i) (f (i + 1))
+-/
+#check dist_le_range_sum_dist
+
 theorem cauchySeq_of_le_geometric_two' {u : ℕ → X}
     (hu : ∀ n : ℕ, dist (u n) (u (n + 1)) ≤ (1 / 2) ^ n) : CauchySeq u := by
   rw [Metric.cauchySeq_iff']
   intro ε ε_pos
-  obtain ⟨N, hN⟩ : ∃ N : ℕ, 1 / 2 ^ N * 2 < ε := by sorry
+  obtain ⟨N, hN⟩ : ∃ N : ℕ, (1 / (2 ^ N)) * 2 < ε := by
+
+
+    sorry
   use N
   intro n hn
   obtain ⟨k, rfl : n = N + k⟩ := le_iff_exists_add.mp hn
