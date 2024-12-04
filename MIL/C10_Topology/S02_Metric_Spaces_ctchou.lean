@@ -185,25 +185,54 @@ Set.eq_empty_or_nonempty.{u} {α : Type u} (s : Set α) : s = ∅ ∨ s.Nonempty
 -/
 #check eq_empty_or_nonempty
 
+#check mem_empty_iff_false
+#check not_mem_empty
+
+
 example {X : Type*} [MetricSpace X] [CompactSpace X]
       {Y : Type*} [MetricSpace Y] {f : X → Y}
     (hf : Continuous f) : UniformContinuous f := by
+--  sorry
   rw [Metric.uniformContinuous_iff]
   intro ε ε_pos
   let φ : X × X → ℝ := fun p ↦ dist (f p.1) (f p.2)
-  let ψ : X × X → ℝ := fun p ↦ ε
   have φ_cont : Continuous φ := by continuity
-  have ψ_cont : Continuous ψ := by continuity
   let K := { p : X × X | ε ≤ φ p }
   rcases Set.eq_empty_or_nonempty K with K_empty | K_nonempty
-  . sorry
-  . have K_closed : IsClosed K := isClosed_le ψ_cont φ_cont
+  . use 1
+    constructor
+    . norm_num
+    . intro a b _
+      by_contra! dist_f_ab
+      have : K.Nonempty := by
+        rw [nonempty_def]
+        use (a,b)
+        simp [K, φ, dist_f_ab]
+      simp [K_empty] at this
+  . let ψ : X × X → ℝ := fun p ↦ ε
+    have ψ_cont : Continuous ψ := by continuity
+    have K_closed : IsClosed K := isClosed_le ψ_cont φ_cont
     have K_compact : IsCompact K := IsClosed.isCompact K_closed
-    have K_min : ∃ p0 ∈ K, ∀ p ∈ K, φ p0 ≤ φ p := K_compact.exists_isMinOn K_nonempty (φ_cont.continuousOn)
-
-
-
-  sorry
+    let d : X × X → ℝ := fun p ↦ dist p.1 p.2
+    have d_cont : Continuous d := by continuity
+    have K_d_min : ∃ p ∈ K, ∀ q ∈ K, d p ≤ d q := K_compact.exists_isMinOn K_nonempty (d_cont.continuousOn)
+    rcases K_d_min with ⟨p, p_K, p_d_min⟩
+    let δ := dist p.1 p.2
+    use δ
+    constructor
+    . by_contra! δ_nonpos
+      have δ_nonneg : 0 ≤ δ := dist_nonneg
+      have δ_zero : δ = 0 := le_antisymm δ_nonpos δ_nonneg
+      rw [dist_eq_zero] at δ_zero
+      have φ_p_zero : φ p = 0 := by simp [φ, δ_zero]
+      simp [K] at p_K
+      linarith
+    . intro a b dist_ab
+      by_contra! dist_f_ab
+      let q := (a,b)
+      have q_K : q ∈ K := by simp [K, φ, dist_f_ab]
+      have := p_d_min q q_K
+      linarith
 
 example (u : ℕ → X) :
     CauchySeq u ↔ ∀ ε > 0, ∃ N : ℕ, ∀ m ≥ N, ∀ n ≥ N, dist (u m) (u n) < ε :=
