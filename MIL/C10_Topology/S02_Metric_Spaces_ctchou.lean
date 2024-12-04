@@ -169,9 +169,40 @@ example {X : Type*} [MetricSpace X] {Y : Type*} [MetricSpace Y] {f : X → Y} :
       ∀ ε > 0, ∃ δ > 0, ∀ {a b : X}, dist a b < δ → dist (f a) (f b) < ε :=
   Metric.uniformContinuous_iff
 
+/-
+isClosed_le.{u, v} {α : Type u} {β : Type v} [TopologicalSpace α] [Preorder α] [t : OrderClosedTopology α]
+  [TopologicalSpace β] {f g : β → α} (hf : Continuous f) (hg : Continuous g) : IsClosed {b | f b ≤ g b}
+-/
+#check isClosed_le
+
+/-
+IsClosed.isCompact.{u} {X : Type u} [TopologicalSpace X] {s : Set X} [CompactSpace X] (h : IsClosed s) : IsCompact s
+-/
+#check IsClosed.isCompact
+
+/-
+Set.eq_empty_or_nonempty.{u} {α : Type u} (s : Set α) : s = ∅ ∨ s.Nonempty
+-/
+#check eq_empty_or_nonempty
+
 example {X : Type*} [MetricSpace X] [CompactSpace X]
       {Y : Type*} [MetricSpace Y] {f : X → Y}
-    (hf : Continuous f) : UniformContinuous f :=
+    (hf : Continuous f) : UniformContinuous f := by
+  rw [Metric.uniformContinuous_iff]
+  intro ε ε_pos
+  let φ : X × X → ℝ := fun p ↦ dist (f p.1) (f p.2)
+  let ψ : X × X → ℝ := fun p ↦ ε
+  have φ_cont : Continuous φ := by continuity
+  have ψ_cont : Continuous ψ := by continuity
+  let K := { p : X × X | ε ≤ φ p }
+  rcases Set.eq_empty_or_nonempty K with K_empty | K_nonempty
+  . sorry
+  . have K_closed : IsClosed K := isClosed_le ψ_cont φ_cont
+    have K_compact : IsCompact K := IsClosed.isCompact K_closed
+    have K_min : ∃ p0 ∈ K, ∀ p ∈ K, φ p0 ≤ φ p := K_compact.exists_isMinOn K_nonempty (φ_cont.continuousOn)
+
+
+
   sorry
 
 example (u : ℕ → X) :
