@@ -271,15 +271,22 @@ theorem cauchySeq_of_le_geometric_two' {u : ℕ → X}
   rw [Metric.cauchySeq_iff']
   intro ε ε_pos
   obtain ⟨N, hN⟩ : ∃ N : ℕ, (1 / (2 ^ N)) * 2 < ε := by
-
-
-    sorry
+--    sorry
+    have half_to_zero := tendsto_pow_atTop_nhds_zero_of_lt_one (by norm_num : (0 : ℝ) ≤ 1/2) (by norm_num : 1/2 < (1 : ℝ))
+    rw [Metric.tendsto_atTop] at half_to_zero
+    have ⟨N, hN1⟩ := half_to_zero (ε/2) (by linarith : ε/2 > (0 : ℝ))
+    use N
+    have hN2 := hN1 N (by linarith : N ≥ N)
+    simp [← one_div, div_pow] at hN2
+    linarith
   use N
   intro n hn
   obtain ⟨k, rfl : n = N + k⟩ := le_iff_exists_add.mp hn
   calc
-    dist (u (N + k)) (u N) = dist (u (N + 0)) (u (N + k)) := sorry
-    _ ≤ ∑ i in range k, dist (u (N + i)) (u (N + (i + 1))) := sorry
+    dist (u (N + k)) (u N) = dist (u (N + 0)) (u (N + k)) := by { rw [dist_comm] ; simp }
+    _ ≤ ∑ i in range k, dist (u (N + i)) (u (N + (i + 1))) := by {
+
+    }
     _ ≤ ∑ i in range k, (1 / 2 : ℝ) ^ (N + i) := sorry
     _ = 1 / 2 ^ N * ∑ i in range k, (1 / 2 : ℝ) ^ i := sorry
     _ ≤ 1 / 2 ^ N * 2 := sorry
