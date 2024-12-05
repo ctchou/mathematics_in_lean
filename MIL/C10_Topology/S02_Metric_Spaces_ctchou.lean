@@ -276,8 +276,6 @@ Finset.mul_sum.{u_1, u_3} {ι : Type u_1} {α : Type u_3} [NonUnitalNonAssocSemi
 -/
 #check mul_sum
 
--- ⊢ ∑ i ∈ Finset.range k, (1 / 2) ^ (N + i) = ∑ i ∈ Finset.range k, 1 / 2 ^ N * (1 / 2) ^ i
-
 lemma aux (k : ℕ) : ∑ i ∈ Finset.range k, (1 / 2 : ℝ) ^ i = 2 - 2 * (1 / 2) ^ k := by
   induction' k with k ih
   . simp
@@ -317,19 +315,51 @@ theorem cauchySeq_of_le_geometric_two' {u : ℕ → X}
 
 open Metric
 
+/-
+Dense.exists_mem_open.{u} {X : Type u} {s : Set X} [TopologicalSpace X] (hs : Dense s) {U : Set X} (ho : IsOpen U)
+  (hne : U.Nonempty) : ∃ x ∈ s, x ∈ U
+-/
+#check Dense.exists_mem_open
+
 example [CompleteSpace X] (f : ℕ → Set X) (ho : ∀ n, IsOpen (f n)) (hd : ∀ n, Dense (f n)) :
     Dense (⋂ n, f n) := by
   let B : ℕ → ℝ := fun n ↦ (1 / 2) ^ n
-  have Bpos : ∀ n, 0 < B n
-  sorry
+  have Bpos : ∀ n, 0 < B n := by
+--    sorry
+    intro n
+    simp [B]
   /- Translate the density assumption into two functions `center` and `radius` associating
     to any n, x, δ, δpos a center and a positive radius such that
     `closedBall center radius` is included both in `f n` and in `closedBall x δ`.
     We can also require `radius ≤ (1/2)^(n+1)`, to ensure we get a Cauchy sequence later. -/
   have :
     ∀ (n : ℕ) (x : X),
-      ∀ δ > 0, ∃ y : X, ∃ r > 0, r ≤ B (n + 1) ∧ closedBall y r ⊆ closedBall x δ ∩ f n :=
-    by sorry
+      ∀ δ > 0, ∃ y : X, ∃ r > 0, r ≤ B (n + 1) ∧ closedBall y r ⊆ closedBall x δ ∩ f n := by
+--    sorry
+    intro n x δ δ_pos
+    have xδ_open : IsOpen (ball x δ) := isOpen_ball
+    obtain ⟨y, y_fn, y_xδ⟩ : ∃ y ∈ f n, y ∈ ball x δ := by
+      have : (ball x δ).Nonempty := by simp [nonempty_ball, δ_pos]
+      apply Dense.exists_mem_open (hd n) xδ_open this
+    have y_inter : y ∈ f n ∩ ball x δ := mem_inter y_fn y_xδ
+    have inter_open : IsOpen (f n ∩ ball x δ) := IsOpen.inter (ho n) xδ_open
+    rw [Metric.isOpen_iff] at inter_open
+    have ⟨ε, ε_pos, yε_inter⟩ := inter_open y y_inter
+    use y, min (ε / 2) (B (n+1))
+    constructor
+    . have h1 : 0 < ε / 2 := by linarith
+      have h2 : 0 < B (n + 1) := by simp [B]
+      exact lt_min h1 h2
+    constructor
+    . apply min_le_right
+    . have h1 : closedBall y (min (ε / 2) (B (n + 1))) ⊆ ball y ε := by
+        intro ; simp ; intros ; linarith
+      apply subset_trans h1
+      apply subset_trans yε_inter
+      intro ; simp;  intros
+      constructor
+      . linarith
+      . assumption
   choose! center radius Hpos HB Hball using this
   intro x
   rw [mem_closure_iff_nhds_basis nhds_basis_closedBall]
