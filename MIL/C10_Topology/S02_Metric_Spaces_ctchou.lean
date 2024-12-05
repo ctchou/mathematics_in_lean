@@ -281,7 +281,7 @@ Finset.mul_sum.{u_1, u_3} {ι : Type u_1} {α : Type u_3} [NonUnitalNonAssocSemi
 lemma aux (k : ℕ) : ∑ i ∈ Finset.range k, (1 / 2 : ℝ) ^ i = 2 - 2 * (1 / 2) ^ k := by
   induction' k with k ih
   . simp
-  rw [sum_range_succ, ih, pow_succ]
+  rw [sum_range_succ, ih]
   ring
 
 theorem cauchySeq_of_le_geometric_two' {u : ℕ → X}
