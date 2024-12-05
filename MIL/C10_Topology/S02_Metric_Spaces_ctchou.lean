@@ -265,6 +265,24 @@ dist_le_range_sum_dist.{u} {α : Type u} [PseudoMetricSpace α] (f : ℕ → α)
   dist (f 0) (f n) ≤ ∑ i ∈ Finset.range n, dist (f i) (f (i + 1))
 -/
 #check dist_le_range_sum_dist
+/-
+Finset.sum_le_sum.{u_1, u_5} {ι : Type u_1} {N : Type u_5} [OrderedAddCommMonoid N] {f g : ι → N} {s : Finset ι}
+  (h : ∀ i ∈ s, f i ≤ g i) : ∑ i ∈ s, f i ≤ ∑ i ∈ s, g i
+-/
+#check sum_le_sum
+/-
+Finset.mul_sum.{u_1, u_3} {ι : Type u_1} {α : Type u_3} [NonUnitalNonAssocSemiring α] (s : Finset ι) (f : ι → α)
+  (a : α) : a * ∑ i ∈ s, f i = ∑ i ∈ s, a * f i
+-/
+#check mul_sum
+
+-- ⊢ ∑ i ∈ Finset.range k, (1 / 2) ^ (N + i) = ∑ i ∈ Finset.range k, 1 / 2 ^ N * (1 / 2) ^ i
+
+lemma aux (k : ℕ) : ∑ i ∈ Finset.range k, (1 / 2 : ℝ) ^ i = 2 - 2 * (1 / 2) ^ k := by
+  induction' k with k ih
+  . simp
+  rw [sum_range_succ, ih, pow_succ]
+  ring
 
 theorem cauchySeq_of_le_geometric_two' {u : ℕ → X}
     (hu : ∀ n : ℕ, dist (u n) (u (n + 1)) ≤ (1 / 2) ^ n) : CauchySeq u := by
@@ -284,13 +302,17 @@ theorem cauchySeq_of_le_geometric_two' {u : ℕ → X}
   obtain ⟨k, rfl : n = N + k⟩ := le_iff_exists_add.mp hn
   calc
     dist (u (N + k)) (u N) = dist (u (N + 0)) (u (N + k)) := by { rw [dist_comm] ; simp }
-    _ ≤ ∑ i in range k, dist (u (N + i)) (u (N + (i + 1))) := by {
-
+    _ ≤ ∑ i in range k, dist (u (N + i)) (u (N + (i + 1))) := by { exact dist_le_range_sum_dist (fun i ↦ u (N + i)) k }
+    _ ≤ ∑ i in range k, (1 / 2 : ℝ) ^ (N + i) := by { apply sum_le_sum ; intro i _ ; exact hu (N + i) }
+    _ = 1 / 2 ^ N * ∑ i in range k, (1 / 2 : ℝ) ^ i := by { rw [mul_sum] ; congr ; ext i ; ring_nf }
+    _ ≤ 1 / 2 ^ N * 2 := by {
+      have : (0 : ℝ) < 1 / 2 ^ N := by simp
+      apply (mul_le_mul_left this).mpr
+      rw [aux]
+      have : (0 : ℝ) < 2 * (1 / 2) ^ k := by simp
+      linarith
     }
-    _ ≤ ∑ i in range k, (1 / 2 : ℝ) ^ (N + i) := sorry
-    _ = 1 / 2 ^ N * ∑ i in range k, (1 / 2 : ℝ) ^ i := sorry
-    _ ≤ 1 / 2 ^ N * 2 := sorry
-    _ < ε := sorry
+    _ < ε := by { linarith }
 
 
 open Metric
