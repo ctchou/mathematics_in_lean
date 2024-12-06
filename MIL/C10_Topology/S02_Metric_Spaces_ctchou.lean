@@ -320,6 +320,16 @@ Dense.exists_mem_open.{u} {X : Type u} {s : Set X} [TopologicalSpace X] (hs : De
   (hne : U.Nonempty) : ∃ x ∈ s, x ∈ U
 -/
 #check Dense.exists_mem_open
+/-
+mem_closure_iff_nhds_basis.{u, w} {X : Type u} {ι : Sort w} {x : X} {t : Set X} [TopologicalSpace X] {p : ι → Prop}
+  {s : ι → Set X} (h : (𝓝 x).HasBasis p s) : x ∈ closure t ↔ ∀ (i : ι), p i → ∃ y ∈ t, y ∈ s i
+-/
+#check mem_closure_iff_nhds_basis
+/-
+Metric.nhds_basis_closedBall.{u} {α : Type u} [PseudoMetricSpace α] {x : α} :
+  (𝓝 x).HasBasis (fun ε ↦ 0 < ε) (closedBall x)
+-/
+#check nhds_basis_closedBall
 
 example [CompleteSpace X] (f : ℕ → Set X) (ho : ∀ n, IsOpen (f n)) (hd : ∀ n, Dense (f n)) :
     Dense (⋂ n, f n) := by
@@ -375,11 +385,32 @@ example [CompleteSpace X] (f : ℕ → Set X) (ho : ∀ n, IsOpen (f n)) (hd : �
       fun n p ↦ Prod.mk (center n p.1 p.2) (radius n p.1 p.2)
   let c : ℕ → X := fun n ↦ (F n).1
   let r : ℕ → ℝ := fun n ↦ (F n).2
-  have rpos : ∀ n, 0 < r n := by sorry
-  have rB : ∀ n, r n ≤ B n := by sorry
+  have rpos : ∀ n, 0 < r n := by
+--    sorry
+    intro n
+    induction' n with n ih
+    . simp [r, F, B] ; assumption
+    exact Hpos n (c n) (r n) ih
+  have rB : ∀ n, r n ≤ B n := by
+--    sorry
+    intro n
+    induction' n with n ih
+    . simp [r, F]
+    exact HB n (c n) (r n) (rpos n)
   have incl : ∀ n, closedBall (c (n + 1)) (r (n + 1)) ⊆ closedBall (c n) (r n) ∩ f n := by
+--    sorry
+    intro n
+    exact Hball n (c n) (r n) (rpos n)
+  have cdist : ∀ n, dist (c n) (c (n + 1)) ≤ B n := by
+    intro n
+    rw [dist_comm]
+    have h1 : c (n + 1) ∈ closedBall (c (n + 1)) (r (n + 1)) := by
+      simp
+      have := rpos (n + 1)
+      linarith
+    have h2 := Set.mem_of_subset_of_mem (incl n) h1
+
     sorry
-  have cdist : ∀ n, dist (c n) (c (n + 1)) ≤ B n := by sorry
   have : CauchySeq c := cauchySeq_of_le_geometric_two' cdist
   -- as the sequence `c n` is Cauchy in a complete space, it converges to a limit `y`.
   rcases cauchySeq_tendsto_of_complete this with ⟨y, ylim⟩
