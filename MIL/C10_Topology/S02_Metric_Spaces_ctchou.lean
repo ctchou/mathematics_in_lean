@@ -442,17 +442,10 @@ example [CompleteSpace X] (f : ℕ → Set X) (ho : ∀ n, IsOpen (f n)) (hd : �
   have I : ∀ n, ∀ m ≥ n, closedBall (c m) (r m) ⊆ closedBall (c n) (r n) := by
 --    sorry
     intro n m hmn
-    rw [ge_iff_le, le_iff_exists_add] at hmn
-    obtain ⟨k, m_eq⟩ := hmn
-    revert m_eq m
-    induction' k with k ih
-    . simp
-    rw [← add_assoc]
-    intro m m_eq ; rw [m_eq]
-    have h1 := (Set.subset_inter_iff.mp (incl (n + k))).1
-    have h2 := ih (n + k)
-    simp at h2
-    exact subset_trans h1 h2
+    induction' m, hmn using Nat.le_induction with m hmn ih
+    . apply subset_refl
+    have h1 := (Set.subset_inter_iff.mp (incl (m))).1
+    exact subset_trans h1 ih
   have yball : ∀ n, y ∈ closedBall (c n) (r n) := by
 --    sorry
     intro n
