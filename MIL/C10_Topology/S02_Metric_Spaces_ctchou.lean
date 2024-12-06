@@ -330,6 +330,27 @@ Metric.nhds_basis_closedBall.{u} {α : Type u} [PseudoMetricSpace α] {x : α} :
   (𝓝 x).HasBasis (fun ε ↦ 0 < ε) (closedBall x)
 -/
 #check nhds_basis_closedBall
+/-
+cauchySeq_tendsto_of_complete.{u, v} {α : Type u} {β : Type v} [uniformSpace : UniformSpace α] [Preorder β]
+  [CompleteSpace α] {u : β → α} (H : CauchySeq u) : ∃ x, Tendsto u atTop (𝓝 x)
+-/
+#check cauchySeq_tendsto_of_complete
+/-
+Metric.isClosed_ball.{u_2} {α : Type u_2} [PseudoMetricSpace α] {x : α} {ε : ℝ} : IsClosed (closedBall x ε)
+-/
+#check isClosed_ball
+/-
+IsClosed.mem_of_tendsto.{u, u_1} {X : Type u} {α : Type u_1} {x : X} {s : Set X} [TopologicalSpace X] {f : α → X}
+  {b : Filter α} [b.NeBot] (hs : IsClosed s) (hf : Tendsto f b (𝓝 x)) (h : ∀ᶠ (x : α) in b, f x ∈ s) : x ∈ s
+-/
+#check IsClosed.mem_of_tendsto
+/-
+Filter.eventually_ge_atTop.{u_3} {α : Type u_3} [Preorder α] (a : α) : ∀ᶠ (x : α) in atTop, a ≤ x
+-/
+/-
+Eventually.mono (eventually_ge_atTop 42) : (∀ (x : ℕ), 42 ≤ x → ?m.166844 x) → ∀ᶠ (x : ℕ) in atTop, ?m.166844 x
+-/
+#check (Filter.eventually_ge_atTop 42).mono
 
 example [CompleteSpace X] (f : ℕ → Set X) (ho : ∀ n, IsOpen (f n)) (hd : ∀ n, Dense (f n)) :
     Dense (⋂ n, f n) := by
@@ -402,21 +423,50 @@ example [CompleteSpace X] (f : ℕ → Set X) (ho : ∀ n, IsOpen (f n)) (hd : �
     intro n
     exact Hball n (c n) (r n) (rpos n)
   have cdist : ∀ n, dist (c n) (c (n + 1)) ≤ B n := by
+--    sorry
     intro n
     rw [dist_comm]
     have h1 : c (n + 1) ∈ closedBall (c (n + 1)) (r (n + 1)) := by
       simp
       have := rpos (n + 1)
       linarith
-    have h2 := Set.mem_of_subset_of_mem (incl n) h1
-
-    sorry
+    have h2 := (incl n h1).1
+    simp at h2
+    exact le_trans h2 (rB n)
   have : CauchySeq c := cauchySeq_of_le_geometric_two' cdist
   -- as the sequence `c n` is Cauchy in a complete space, it converges to a limit `y`.
   rcases cauchySeq_tendsto_of_complete this with ⟨y, ylim⟩
   -- this point `y` will be the desired point. We will check that it belongs to all
   -- `f n` and to `ball x ε`.
   use y
-  have I : ∀ n, ∀ m ≥ n, closedBall (c m) (r m) ⊆ closedBall (c n) (r n) := by sorry
-  have yball : ∀ n, y ∈ closedBall (c n) (r n) := by sorry
-  sorry
+  have I : ∀ n, ∀ m ≥ n, closedBall (c m) (r m) ⊆ closedBall (c n) (r n) := by
+--    sorry
+    intro n m hmn
+    rw [ge_iff_le, le_iff_exists_add] at hmn
+    obtain ⟨k, m_eq⟩ := hmn
+    revert m_eq m
+    induction' k with k ih
+    . simp
+    rw [← add_assoc]
+    intro m m_eq ; rw [m_eq]
+    have h1 := (Set.subset_inter_iff.mp (incl (n + k))).1
+    have h2 := ih (n + k)
+    simp at h2
+    exact subset_trans h1 h2
+  have yball : ∀ n, y ∈ closedBall (c n) (r n) := by
+--    sorry
+    intro n
+    refine isClosed_ball.mem_of_tendsto ylim ?_
+    refine (Filter.eventually_ge_atTop n).mono fun m hm ↦ ?_
+    have h1 : c m ∈ closedBall (c m) (r m) := mem_closedBall_self ((rpos m).le : 0 ≤ r m)
+    have h2 := I n m hm
+    exact h2 h1
+--  sorry
+  constructor
+  . simp ; intro n
+    have h1 := yball (n + 1)
+    exact (incl n h1).2
+  . have h0 := yball 0
+    simp [c, F, r] at h0
+    simp
+    exact h0.1
