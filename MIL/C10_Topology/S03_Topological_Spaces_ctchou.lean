@@ -34,7 +34,7 @@ example {f : X → Y} {x : X} : ContinuousAt f x ↔ ∀ U ∈ 𝓝 (f x), ∀�
 example {x : X} {s : Set X} : s ∈ 𝓝 x ↔ ∃ t, t ⊆ s ∧ IsOpen t ∧ x ∈ t :=
   mem_nhds_iff
 
-example (x : X) : pure x = 𝓟 {x} := by simp
+example (x : X) : pure x = 𝓟 {x} := by simp only [principal_singleton]
 
 example (x : X) : pure x ≤ 𝓝 x :=
   pure_le_nhds x
@@ -45,14 +45,35 @@ example (x : X) (P : X → Prop) (h : ∀ᶠ y in 𝓝 x, P y) : P x :=
 example {P : X → Prop} {x : X} (h : ∀ᶠ y in 𝓝 x, P y) : ∀ᶠ y in 𝓝 x, ∀ᶠ z in 𝓝 y, P z :=
   eventually_eventually_nhds.mpr h
 
+/-
+TopologicalSpace.mkOfNhds.{u} {α : Type u} (n : α → Filter α) : TopologicalSpace α
+-/
 #check TopologicalSpace.mkOfNhds
 
+/-
+TopologicalSpace.nhds_mkOfNhds.{u} {α : Type u} (n : α → Filter α) (a : α) (h₀ : pure ≤ n)
+  (h₁ : ∀ (a : α), ∀ s ∈ n a, ∀ᶠ (y : α) in n a, s ∈ n y) : 𝓝 a = n a
+-/
 #check TopologicalSpace.nhds_mkOfNhds
+
+/-
+mem_nhds_iff.{u} {X : Type u} {x : X} {s : Set X} [TopologicalSpace X] : s ∈ 𝓝 x ↔ ∃ t ⊆ s, IsOpen t ∧ x ∈ t
+-/
+#check mem_nhds_iff
 
 example {α : Type*} (n : α → Filter α) (H₀ : ∀ a, pure a ≤ n a)
     (H : ∀ a : α, ∀ p : α → Prop, (∀ᶠ x in n a, p x) → ∀ᶠ y in n a, ∀ᶠ x in n y, p x) :
-    ∀ a, ∀ s ∈ n a, ∃ t ∈ n a, t ⊆ s ∧ ∀ a' ∈ t, s ∈ n a' :=
-  sorry
+    ∀ a, ∀ s ∈ n a, ∃ t ∈ n a, t ⊆ s ∧ ∀ a' ∈ t, s ∈ n a' := by
+  intro a s s_in
+  let t := { y | s ∈ n y }
+  use t
+  constructor
+  . refine H a (fun x ↦ x ∈ s) s_in
+  constructor
+  . intro x ; simp [t]
+    intro s_nx
+    exact H₀ x s_nx
+  . simp [t]
 
 end
 
