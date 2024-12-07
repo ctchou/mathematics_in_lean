@@ -34,6 +34,8 @@ example {f : X → Y} {x : X} : ContinuousAt f x ↔ ∀ U ∈ 𝓝 (f x), ∀�
 example {x : X} {s : Set X} : s ∈ 𝓝 x ↔ ∃ t, t ⊆ s ∧ IsOpen t ∧ x ∈ t :=
   mem_nhds_iff
 
+example (x : X) : pure x = 𝓟 {x} := by simp
+
 example (x : X) : pure x ≤ 𝓝 x :=
   pure_le_nhds x
 
