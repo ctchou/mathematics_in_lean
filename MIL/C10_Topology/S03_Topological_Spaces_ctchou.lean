@@ -152,7 +152,13 @@ example [TopologicalSpace X] [TopologicalSpace Y] [T3Space Y] {A : Set X}
     (hA : ∀ x, x ∈ closure A) {f : A → Y} (f_cont : Continuous f)
     (hf : ∀ x : X, ∃ c : Y, Tendsto f (comap (↑) (𝓝 x)) (𝓝 c)) :
     ∃ φ : X → Y, Continuous φ ∧ ∀ a : A, φ a = f a := by
-  sorry
+  choose φ hφ using hf
+  use φ
+  constructor
+  . sorry
+  . intro a
+
+    sorry
 
 #check HasBasis.tendsto_right_iff
 
