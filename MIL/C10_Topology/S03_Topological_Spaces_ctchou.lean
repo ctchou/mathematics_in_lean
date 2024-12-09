@@ -65,6 +65,7 @@ mem_nhds_iff.{u} {X : Type u} {x : X} {s : Set X} [TopologicalSpace X] : s ∈ �
 example {α : Type*} (n : α → Filter α) (H₀ : ∀ a, pure a ≤ n a)
     (H : ∀ a : α, ∀ p : α → Prop, (∀ᶠ x in n a, p x) → ∀ᶠ y in n a, ∀ᶠ x in n y, p x) :
     ∀ a, ∀ s ∈ n a, ∃ t ∈ n a, t ⊆ s ∧ ∀ a' ∈ t, s ∈ n a' := by
+--  sorry
   intro a s s_in
   let t := { y | s ∈ n y }
   use t
@@ -136,6 +137,7 @@ theorem aux {X Y A : Type*} [TopologicalSpace X] {c : A → X}
       {f : A → Y} {x : X} {F : Filter Y}
       (h : Tendsto f (comap c (𝓝 x)) F) {V' : Set Y} (V'_in : V' ∈ F) :
     ∃ V ∈ 𝓝 x, IsOpen V ∧ c ⁻¹' V ⊆ f ⁻¹' V' := by
+--  sorry
   have h1 : f ⁻¹' V' ∈ comap c (𝓝 x) := h V'_in
   have ⟨U, U_in, U_V'⟩ := mem_comap.mp h1
   have ⟨V, V_U, V_open, x_V⟩ := mem_nhds_iff.mp U_in
