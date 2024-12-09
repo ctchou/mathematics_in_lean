@@ -124,11 +124,21 @@ example [TopologicalSpace X] {x : X} :
     (𝓝 x).HasBasis (fun t : Set X ↦ t ∈ 𝓝 x ∧ IsOpen t) id :=
   nhds_basis_opens' x
 
+#check IsDenseInducing.continuousAt_extend
+
 theorem aux {X Y A : Type*} [TopologicalSpace X] {c : A → X}
       {f : A → Y} {x : X} {F : Filter Y}
       (h : Tendsto f (comap c (𝓝 x)) F) {V' : Set Y} (V'_in : V' ∈ F) :
     ∃ V ∈ 𝓝 x, IsOpen V ∧ c ⁻¹' V ⊆ f ⁻¹' V' := by
-  sorry
+  have h1 : f ⁻¹' V' ∈ comap c (𝓝 x) := h V'_in
+  have ⟨U, U_in, U_V'⟩ := mem_comap.mp h1
+  have ⟨V, V_U, V_open, x_V⟩ := mem_nhds_iff.mp U_in
+  use V
+  repeat' constructor
+  . apply mem_nhds_iff.mpr
+    refine ⟨V, subset_refl V, V_open, x_V⟩
+  . assumption
+  . exact subset_trans (Set.preimage_mono V_U) U_V'
 
 example [TopologicalSpace X] [TopologicalSpace Y] [T3Space Y] {A : Set X}
     (hA : ∀ x, x ∈ closure A) {f : A → Y} (f_cont : Continuous f)
