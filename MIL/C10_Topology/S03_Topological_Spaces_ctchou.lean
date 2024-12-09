@@ -1,6 +1,7 @@
 import MIL.Common
 import Mathlib.Topology.Instances.Real
 import Mathlib.Analysis.Normed.Operator.BanachSteinhaus
+import Mathlib.Topology.DenseEmbedding
 
 open Set Filter Topology
 
@@ -124,6 +125,11 @@ example [TopologicalSpace X] {x : X} :
     (𝓝 x).HasBasis (fun t : Set X ↦ t ∈ 𝓝 x ∧ IsOpen t) id :=
   nhds_basis_opens' x
 
+/-
+IsDenseInducing.continuousAt_extend.{u_1, u_2, u_3} {α : Type u_1} {β : Type u_2} {γ : Type u_3} [TopologicalSpace α]
+  [TopologicalSpace β] {i : α → β} [TopologicalSpace γ] [T3Space γ] {b : β} {f : α → γ} (di : IsDenseInducing i)
+  (hf : ∀ᶠ (x : β) in 𝓝 b, ∃ c, Tendsto f (comap i (𝓝 x)) (𝓝 c)) : ContinuousAt (di.extend f) b
+-/
 #check IsDenseInducing.continuousAt_extend
 
 theorem aux {X Y A : Type*} [TopologicalSpace X] {c : A → X}
