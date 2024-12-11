@@ -2,6 +2,7 @@ import MIL.Common
 import Mathlib.Topology.Instances.Real
 import Mathlib.Analysis.Normed.Operator.BanachSteinhaus
 import Mathlib.Topology.DenseEmbedding
+import Batteries.Tactic.Instances
 
 open Set Filter Topology
 
@@ -228,3 +229,15 @@ example [TopologicalSpace Y] {f : X → Y} (hf : Continuous f) {s : Set X} (hs :
 example {ι : Type*} {s : Set X} (hs : IsCompact s) (U : ι → Set X) (hUo : ∀ i, IsOpen (U i))
     (hsU : s ⊆ ⋃ i, U i) : ∃ t : Finset ι, s ⊆ ⋃ i ∈ t, U i :=
   hs.elim_finite_subcover U hUo hsU
+
+section
+variable (X : Type*) [TopologicalSpace X]
+#instances (T2Space X)
+#instances (T25Space X)
+end
+
+section
+variable (X : Type*) [TopologicalSpace X] [T3Space X]
+#synth (T2Space X)
+#synth (T25Space X)
+end
